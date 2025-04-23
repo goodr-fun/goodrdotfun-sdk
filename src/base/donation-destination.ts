@@ -109,6 +109,16 @@ export const DONATION_DESTINATIONS: Record<number, DonationDestination> = {
   },
 };
 
+export const getDonationDestinationFromId = (
+  id: number,
+): DonationDestination => {
+  const destination = DONATION_DESTINATIONS[id];
+  if (!destination) {
+    throw new Error(`Donation destination not found: ${id}`);
+  }
+  return destination;
+};
+
 export const getDonationDestinationFromName = (
   name: DonationDestinationName,
 ): DonationDestination => {

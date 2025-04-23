@@ -440,6 +440,58 @@ export class GoodrFunProgramBase {
   }
 
   /**
+   * Buys tokens from the bonding curve.
+   * @param user - The user to buy the tokens.
+   * @param mint - The mint to buy the tokens for.
+   * @param amount - The amount of tokens to buy.
+   * @param maxCostSol - The maximum cost in SOL to buy the tokens.
+   * @returns The transaction.
+   */
+  async buy({
+    user,
+    mint,
+    amount,
+    maxCostSol,
+    creatorWallet,
+  }: {
+    user: PublicKey;
+    mint: PublicKey;
+    amount: anchor.BN;
+    maxCostSol: anchor.BN;
+    creatorWallet: PublicKey;
+  }): Promise<Transaction> {
+    const globalState = await this.getGlobalState();
+    const bondingCurvePDA = this.bondingCurvePDA({ mint });
+    const associatedBondingCurve = getAssociatedTokenAddressSync(
+      mint,
+      bondingCurvePDA,
+      true,
+      TOKEN_2022_PROGRAM_ID,
+    );
+
+    const associatedUser = getAssociatedTokenAddressSync(
+      mint,
+      user,
+      false,
+      TOKEN_2022_PROGRAM_ID,
+    );
+
+    return await this.program.methods
+      .buy(amount, maxCostSol)
+      .accountsPartial({
+        user,
+        global: this.globalPDA,
+        associatedBondingCurve: associatedBondingCurve,
+        bondingCurve: bondingCurvePDA,
+        mint: mint,
+        associatedUser: associatedUser,
+        operatingWallet: globalState?.operatingWallet,
+        creatorWallet: creatorWallet,
+      })
+      .transaction();
+  }
+
+  /**
    * Sells tokens to the bonding curve by token amount.
    * @param user - The user to sell the tokens.
    * @param mint - The mint to sell the tokens for.

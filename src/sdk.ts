@@ -1,4 +1,9 @@
-import { Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  Transaction,
+} from '@solana/web3.js';
 import { GoodrFunProgram } from './base/program';
 import {
   CreateEvent,
@@ -17,6 +22,7 @@ import { BN } from 'bn.js';
 import { DEFAULT_SLIPPAGE_BASIS_POINTS, TOKEN_DECIMALS } from './base/constant';
 import { sendTx } from './base/helpers/helper';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { BigNumber } from 'bignumber.js';
 
 /**
  * SDK for interacting with the GoodrFun program on Solana and Sonic
@@ -193,14 +199,22 @@ export class GoodrFunSDK {
     tx.add(createTokenTx);
 
     if (params.buySolAmount.gt(0)) {
-      const buyTokenTx = await this.program.buyBySolAmount(
-        creator,
-        params.mint.publicKey,
-        params.buySolAmount,
-        slippageBasisPoints,
-      );
+      const { amountToken, maxCostSol } =
+        await this.program.calculateBuyTokenAmount({
+          mint: params.mint.publicKey,
+          amountSol: new BN(params.buySolAmount.toNumber()),
+          slippage: slippageBasisPoints,
+        });
 
-      tx.add(buyTokenTx);
+      const initialBuyTx = await this.program.buy({
+        user: creator,
+        mint: params.mint.publicKey,
+        amount: amountToken,
+        maxCostSol: maxCostSol,
+        creatorWallet: creator,
+      });
+
+      tx.add(initialBuyTx);
     }
 
     const hash = await this.program.connection.getLatestBlockhash();
@@ -352,6 +366,41 @@ export class GoodrFunSDK {
     };
   }
 
+  /**
+   * Calculates the amount of SOL that can be received for a given amount of tokens
+   * @param params - Parameters containing mint and token amount
+   * @returns Object containing the calculated SOL amount
+   */
+  async calculateSellTokenAmount({
+    mint,
+    amountToken,
+  }: {
+    mint: PublicKey;
+    amountToken: BigNumber;
+  }): Promise<{ amountSol: BigNumber }> {
+    const bondingCurveAccount = await this.program.getBondingCurveAccount({
+      mint,
+    });
+
+    const globalAccount = await this.program.getGlobalAccount();
+    if (!globalAccount) {
+      throw new Error('Global account not found');
+    }
+
+    if (!bondingCurveAccount) {
+      throw new Error('Bonding curve account not found');
+    }
+
+    const sellPrice = bondingCurveAccount.getSellPrice(
+      amountToken,
+      globalAccount.operatingFeeBasisPoints,
+      globalAccount.creatorFeeBasisPoints,
+    );
+
+    return {
+      amountSol: sellPrice.dividedBy(LAMPORTS_PER_SOL),
+    };
+  }
   /**
    * Gets the current price and market cap data for a token
    * @param mint - The token mint address
