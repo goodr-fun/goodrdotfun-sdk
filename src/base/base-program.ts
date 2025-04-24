@@ -18,8 +18,7 @@ import {
   calculateWithSlippageBuy,
   calculateWithSlippageSell,
 } from './helpers/helper';
-import { BondingCurveAccount } from './states/bonding-curve-account';
-import { GlobalAccount } from './states/global-account';
+import { BondingCurveAccount, GlobalAccount } from './states';
 
 export const GLOBAL_SEED = 'global';
 export const BONDING_CURVE_SEED = 'bonding_curve';

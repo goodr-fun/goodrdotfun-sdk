@@ -18,6 +18,8 @@ import {
   SellParams,
   PriceData,
   TokenState,
+  GlobalAccount,
+  BondingCurveAccount,
 } from './types';
 import { getDonationDestinationFromName } from './base/donation-destination';
 import { BN } from 'bn.js';
@@ -38,6 +40,24 @@ export class GoodrFunSDK {
    */
   constructor(rpcEndpoint: string) {
     this.program = new GoodrFunProgram(rpcEndpoint);
+  }
+
+  /**
+   * Gets the global account
+   * @returns The global account
+   */
+  async getGlobalAccount(): Promise<GlobalAccount | null> {
+    return await this.program.getGlobalAccount();
+  }
+
+  /**
+   * Gets the bonding curve account
+   * @returns The bonding curve account
+   */
+  async getBondingCurveAccount(
+    mint: PublicKey,
+  ): Promise<BondingCurveAccount | null> {
+    return await this.program.getBondingCurveAccount({ mint });
   }
 
   /**
