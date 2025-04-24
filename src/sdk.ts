@@ -2,6 +2,8 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
+  sendAndConfirmTransaction,
+  Signer,
   Transaction,
 } from '@solana/web3.js';
 import { GoodrFunProgram } from './base/program';
@@ -310,6 +312,19 @@ export class GoodrFunSDK {
     );
 
     return sellTokenTx;
+  }
+
+  async withdraw({ authority, mint }: { authority: Signer; mint: PublicKey }) {
+    const withdrawTx = await this.program.withdraw({
+      user: authority.publicKey,
+      mint,
+    });
+    const txHash = await sendAndConfirmTransaction(
+      this.program.connection,
+      withdrawTx,
+      [authority],
+    );
+    return txHash;
   }
 
   /**
