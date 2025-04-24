@@ -43,6 +43,14 @@ export class GoodrFunSDK {
   }
 
   /**
+   * Gets the program ID
+   * @returns The program ID
+   */
+  get programId(): PublicKey {
+    return this.program.program.programId;
+  }
+
+  /**
    * Gets the global account
    * @returns The global account
    */
