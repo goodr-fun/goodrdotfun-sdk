@@ -6,6 +6,7 @@ import {
 } from './base-program';
 import { TOKEN_DECIMALS } from './constant';
 import { PriceData } from './types/common';
+import { BigNumber } from 'bignumber.js';
 
 export class GoodrFunProgram extends GoodrFunProgramBase {
   private _decimals = TOKEN_DECIMALS;
