@@ -27,6 +27,7 @@ import { DEFAULT_SLIPPAGE_BASIS_POINTS, TOKEN_DECIMALS } from './base/constant';
 import { sendTx } from './base/helpers/helper';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { BigNumber } from 'bignumber.js';
+import { Idl } from '@coral-xyz/anchor';
 
 /**
  * SDK for interacting with the GoodrFun program on Solana and Sonic
@@ -48,6 +49,14 @@ export class GoodrFunSDK {
    */
   get programId(): PublicKey {
     return this.program.program.programId;
+  }
+
+  /**
+   * Gets the IDL
+   * @returns The IDL of the program
+   */
+  get idl(): Idl {
+    return this.program.program.idl;
   }
 
   /**
