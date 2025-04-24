@@ -157,6 +157,10 @@ export class GoodrFunSDK {
     params: CreateAndBuyParams,
   ): Promise<TransactionResult> {
     const tx = await this.createAndBuyTx(creator.publicKey, params);
+    const hash = await this.program.connection.getLatestBlockhash();
+    tx.feePayer = creator.publicKey;
+    tx.recentBlockhash = hash.blockhash;
+
     const result = await sendTx(
       this.program.connection,
       tx,
@@ -217,10 +221,6 @@ export class GoodrFunSDK {
       tx.add(initialBuyTx);
     }
 
-    const hash = await this.program.connection.getLatestBlockhash();
-    tx.feePayer = creator;
-    tx.recentBlockhash = hash.blockhash;
-
     return tx;
   }
 
@@ -232,12 +232,17 @@ export class GoodrFunSDK {
    */
   async buy(creator: Keypair, params: BuyParams): Promise<TransactionResult> {
     const tx = await this.buyTx(creator.publicKey, params);
+    const hash = await this.program.connection.getLatestBlockhash();
+    tx.feePayer = creator.publicKey;
+    tx.recentBlockhash = hash.blockhash;
+
     const result = await sendTx(
       this.program.connection,
       tx,
       creator.publicKey,
       [creator],
     );
+
     return result;
   }
 
@@ -260,10 +265,6 @@ export class GoodrFunSDK {
       slippageBasisPoints,
     );
 
-    const hash = await this.program.connection.getLatestBlockhash();
-    buyTokenTx.feePayer = creator;
-    buyTokenTx.recentBlockhash = hash.blockhash;
-
     return buyTokenTx;
   }
 
@@ -275,6 +276,11 @@ export class GoodrFunSDK {
    */
   async sell(creator: Keypair, params: SellParams): Promise<TransactionResult> {
     const tx = await this.sellTx(creator.publicKey, params);
+
+    const hash = await this.program.connection.getLatestBlockhash();
+    tx.feePayer = creator.publicKey;
+    tx.recentBlockhash = hash.blockhash;
+
     const result = await sendTx(
       this.program.connection,
       tx,
@@ -302,10 +308,6 @@ export class GoodrFunSDK {
       params.tokenAmount,
       slippageBasisPoints,
     );
-
-    const hash = await this.program.connection.getLatestBlockhash();
-    sellTokenTx.feePayer = creator;
-    sellTokenTx.recentBlockhash = hash.blockhash;
 
     return sellTokenTx;
   }
