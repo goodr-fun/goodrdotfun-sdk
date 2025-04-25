@@ -236,7 +236,9 @@ export class GoodrFunSDK {
       symbol: params.metadata.symbol,
       uri: params.metadata.metadataUri,
       donationDestination: donationDestination.address,
-      donationAmount: new BN(params.donationAmount),
+      donationAmount: new BN(
+        params.donationAmount * 10 ** this.program.decimals,
+      ),
     });
 
     tx.add(createTokenTx);
