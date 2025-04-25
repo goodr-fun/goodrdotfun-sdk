@@ -5,13 +5,13 @@ JavaScript/TypeScript SDK for interacting with goodr.fun and Sonic on Solana.
 ## Installation
 
 ```bash
-npm install goodr-sdk
+npm install goodrdotfun-sdk
 ```
 
 ## Usage
 
 ```typescript
-import { GoodrFunSDK } from 'goodr-sdk';
+import { GoodrFunSDK } from 'goodrdotfun-sdk';
 import { Keypair } from '@solana/web3.js';
 
 // Initialize the SDK with your RPC endpoint
@@ -27,7 +27,7 @@ const result = await sdk.createAndBuy(creator, {
     metadataUri: 'https://example.com/metadata.json',
   },
   donationDestination: 'charity',
-  donationAmount: 1000000, // 0.001 SOL
+  donationAmount: 5000000, // 0.001 SOL
   buySolAmount: new BigNumber(1000000000), // 1 SOL
   slippageBasisPoints: 100, // 1% slippage
 });
