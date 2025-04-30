@@ -204,7 +204,7 @@ export class GoodrFunSDK {
       this.program.connection,
       tx,
       creator.publicKey,
-      [creator],
+      [creator, params.mint],
     );
     return result;
   }

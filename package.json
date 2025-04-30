@@ -1,6 +1,6 @@
 {
   "name": "goodrdotfun-sdk",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "SDK for interacting with goodr.fun and Sonic on Solana",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -52,6 +52,7 @@
     "@types/node": "^20.10.5",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "dotenv": "^16.5.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.2",
