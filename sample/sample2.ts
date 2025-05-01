@@ -1,9 +1,9 @@
 /**
  * Buy & Sell an existing Goodr / Sonic token
  * -----------------------------------------
- * .env に下記だけを用意してください
- * WALLET_PUBLIC_KEY=<あなたの公開鍵>
- * WALLET_PRIVATE_KEY=<あなたの秘密鍵 (bs58)>
+ * Prepare a .env file containing only:
+ * WALLET_PUBLIC_KEY=<your public key>
+ * WALLET_PRIVATE_KEY=<your private key (bs58)>
  */
 
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
@@ -15,23 +15,23 @@ import { resolve } from 'path';
 
 dotenv.config({ path: resolve(__dirname, '.env') });
 
-/* ========= ここで対象トークンと数量を指定 ========= */
-const TOKEN_MINT_ADDRESS = '9aadzjRyiz5qXoKmAinWwV1TbygasMNnpkRxTSP4thry';   // 購入したいトークンの Mint
-const BUY_SOL_AMOUNT    = 0.05;           // SOL 建ての買付額
-const SELL_TOKEN_AMOUNT = 0;           // 売却したいトークン数量
-const TOKEN_DECIMALS    = 6;              // トークンの小数点桁数（通常 6）
-/* ================================================ */
+/* ========= Specify the target token and amounts here ========= */
+const TOKEN_MINT_ADDRESS = '9aadzjRyiz5qXoKmAinWwV1TbygasMNnpkRxTSP4thry'; // Mint address of the token you want to buy
+const BUY_SOL_AMOUNT    = 0.05;                                              // Amount of SOL to spend when buying
+const SELL_TOKEN_AMOUNT = 0;                                                 // Amount of tokens to sell
+const TOKEN_DECIMALS    = 6;                                                 // Token decimals (usually 6)
+/* ============================================================ */
 
 async function main() {
-  const rpcEndpoint = 'https://api.testnet.sonic.game';   // 必要に応じて Mainnet に変更
+  const rpcEndpoint = 'https://api.testnet.sonic.game'; // Change to mainnet if needed
   const sdk = new GoodrFunSDK(rpcEndpoint);
 
   const { WALLET_PUBLIC_KEY, WALLET_PRIVATE_KEY } = process.env;
   if (!WALLET_PUBLIC_KEY || !WALLET_PRIVATE_KEY) {
-    throw new Error('.env に WALLET_PUBLIC_KEY と WALLET_PRIVATE_KEY を設定してください');
+    throw new Error('.env must contain WALLET_PUBLIC_KEY and WALLET_PRIVATE_KEY');
   }
 
-  // -------- ウォレット復元 --------
+  // -------- Restore wallet --------
   const wallet = new Keypair({
     publicKey: new PublicKey(WALLET_PUBLIC_KEY).toBytes(),
     secretKey: bs58.decode(WALLET_PRIVATE_KEY),
@@ -57,7 +57,7 @@ async function main() {
     console.log(`✅ Sell Tx : ${sellTx.signature}`);
   }
 
-  // -------- 最終状態表示 (任意) --------
+  // -------- Display final state (optional) --------
   const state = await sdk.getCurrentState(mint);
   console.log(`
   --- Token State ---
@@ -68,3 +68,4 @@ async function main() {
 }
 
 main().catch(console.error);
+
