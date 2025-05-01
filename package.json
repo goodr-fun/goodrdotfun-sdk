@@ -1,6 +1,6 @@
 {
   "name": "goodrdotfun-sdk",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "SDK for interacting with goodr.fun and Sonic on Solana",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

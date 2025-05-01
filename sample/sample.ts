@@ -4,6 +4,7 @@ import bs58 from 'bs58';
 import { BigNumber } from 'bignumber.js';
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
+import { TOKEN_DECIMALS } from '../src/base/constant';
 
 // Load environment variables from .env file
 dotenv.config({ path: resolve(__dirname, '.env') });
@@ -72,22 +73,22 @@ const main = async () => {
     slippageBasisPoints: 500,
   });
 
-  console.log(`
-      Token buy transaction hash: ${buyResult.signature},
-      Token address: ${mint.publicKey.toBase58()},
-    `);
+  console.log(
+    `Token buy transaction hash: ${buyResult.signature}`,
+    `Token address: ${mint.publicKey.toBase58()}`,
+  );
 
   // Sell 100000000 tokens
   const sellResult = await sdk.sell(wallet, {
     mint: mint.publicKey,
-    tokenAmount: new BigNumber(100000000).multipliedBy(10 ** 6),
+    tokenAmount: new BigNumber(100000000).multipliedBy(10 ** TOKEN_DECIMALS),
     slippageBasisPoints: 500,
   });
 
-  console.log(`
-      Token sell transaction hash: ${sellResult.signature},
-      Token address: ${mint.publicKey.toBase58()},
-    `);
+  console.log(
+    `Token sell transaction hash: ${sellResult.signature}`,
+    `Token address: ${mint.publicKey.toBase58()}`,
+  );
 };
 
 main();
