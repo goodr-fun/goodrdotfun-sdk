@@ -186,7 +186,7 @@ export const SOLANA_DONATION_DESTINATIONS: Record<number, DonationDestination> =
     14: {
       id: 14,
       name: DonationDestinationName.NoDonation,
-      address: new PublicKey('7cNG9EJcV63TdFnRbG3WamchetY6UrTiKXdw29a2mYGd'),
+      address: new PublicKey('DK82TXsicQFUs8tKBH2shEyU2FufQMHeRWZmHAqh24oa'),
     },
     15: {
       id: 15,
