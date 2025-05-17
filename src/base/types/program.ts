@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pump_fun.json`.
  */
 export type GoodrFun = {
-  address: '2SKBzHgQABC5F9QoHPBpYMEMMrmZHQ9Z3K3xbzaZKB7T';
+  address: 'UJBMB4Tj3ofc4BUgTRcfnQF1oWA3r28s1VukEoi9oMR';
   metadata: {
     name: 'pumpFun';
     version: '0.1.0';
