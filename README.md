@@ -14,11 +14,7 @@ Here's a complete example showing how to create a token, buy, and sell using the
 
 ```typescript
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import {
-  DonationDestinationName,
-  GoodrFunSDK,
-  TokenMetadata,
-} from 'goodrdotfun-sdk';
+import { GoodrFunSDK, TokenMetadata } from 'goodrdotfun-sdk';
 import { BigNumber } from 'bignumber.js';
 
 const main = async () => {
@@ -47,8 +43,8 @@ const main = async () => {
     name: 'DONUTS',
     ticker: 'DONUTS',
     description: 'DONUTS',
-    donationAmount: '50000000',
-    donationDestinationId: 5,
+    donationAmount: '0',
+    donationDestinationId: 14, // Please hard code this one, currently support NoDonation only
     imageUrl: 'https://picsum.photos/200/300',
     websiteUrl: 'https://donuts.com',
     twitterUrl: 'https://twitter.com/donuts',
@@ -61,8 +57,6 @@ const main = async () => {
   // Create and buy tokens in one transaction
   const result = await sdk.createAndBuy(wallet, {
     mint: mint,
-    donationAmount: 50000000,
-    donationDestination: DonationDestinationName.Biodiversity,
     buySolAmount: new BigNumber(0.1).multipliedBy(LAMPORTS_PER_SOL),
     slippageBasisPoints: 500,
     metadata: {
@@ -120,7 +114,6 @@ main().catch(console.error);
 - Buy and sell tokens with slippage protection
 - Get token balances and price data
 - Monitor token state and bonding curve progress
-- Support for donations to various destinations
 - Built-in bonding curve calculations
 
 ## API Reference
@@ -142,11 +135,8 @@ constructor(rpcEndpoint: string)
 - `createAndBuy(creator: Keypair, params: CreateAndBuyParams): Promise<TransactionResult>`
 
   - Creates a new token and buys initial tokens in a single transaction
-  - Supports donation configuration and metadata setup
   - Parameters:
     - `mint`: Token mint keypair
-    - `donationAmount`: Amount to donate in lamports
-    - `donationDestination`: Destination for donation
     - `buySolAmount`: Initial buy amount in SOL
     - `slippageBasisPoints`: Slippage tolerance
     - `metadata`: Token metadata (name, symbol, URI)

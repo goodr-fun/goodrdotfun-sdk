@@ -1,5 +1,10 @@
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { DonationDestinationName, GoodrFunSDK, TokenMetadata } from '../src';
+import {
+  ChainType,
+  DonationDestinationName,
+  GoodrFunSDK,
+  TokenMetadata,
+} from '../src';
 import bs58 from 'bs58';
 import { BigNumber } from 'bignumber.js';
 import * as dotenv from 'dotenv';
@@ -11,7 +16,7 @@ dotenv.config({ path: resolve(__dirname, '.env') });
 
 const main = async () => {
   const rpcEndpoint = 'https://api.testnet.sonic.game';
-  const sdk = new GoodrFunSDK(rpcEndpoint);
+  const sdk = new GoodrFunSDK(ChainType.SONIC, rpcEndpoint);
 
   const walletPublicKey = process.env.WALLET_PUBLIC_KEY; // Set your wallet public key
   const walletPrivateKey = process.env.WALLET_PRIVATE_KEY; // Set your wallet private key
@@ -44,8 +49,6 @@ const main = async () => {
 
   const result = await sdk.createAndBuy(wallet, {
     mint: mint,
-    donationAmount: 50000000,
-    donationDestination: DonationDestinationName.Biodiversity,
     buySolAmount: new BigNumber(0.1).multipliedBy(LAMPORTS_PER_SOL),
     slippageBasisPoints: 500,
     metadata: {

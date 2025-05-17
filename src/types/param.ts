@@ -22,8 +22,8 @@ export type CreateAndBuyParams = {
   mint: Keypair;
   metadata: TokenCreationMetadata;
   buySolAmount: BigNumber;
-  donationDestination: DonationDestinationName;
-  donationAmount: DonationAmount;
+  // donationDestination: DonationDestinationName;
+  // donationAmount: DonationAmount;
   slippageBasisPoints: number;
 };
 

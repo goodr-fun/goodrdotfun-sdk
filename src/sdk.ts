@@ -20,8 +20,12 @@ import {
   TokenState,
   GlobalAccount,
   BondingCurveAccount,
+  ChainType,
 } from './types';
-import { getDonationDestinationFromName } from './base/donation-destination';
+import {
+  DonationDestinationName,
+  getDonationDestinationFromName,
+} from './base/donation-destination';
 import { BN } from 'bn.js';
 import { DEFAULT_SLIPPAGE_BASIS_POINTS, TOKEN_DECIMALS } from './base/constant';
 import { sendTx } from './base/helpers/helper';
@@ -33,14 +37,16 @@ import { Idl } from '@coral-xyz/anchor';
  * SDK for interacting with the GoodrFun program on Solana and Sonic
  */
 export class GoodrFunSDK {
+  private chainType: ChainType;
   private program: GoodrFunProgram;
 
   /**
    * Creates a new instance of GoodrFunSDK
    * @param rpcEndpoint - The Solana RPC endpoint URL
    */
-  constructor(rpcEndpoint: string) {
+  constructor(chainType: ChainType, rpcEndpoint: string) {
     this.program = new GoodrFunProgram(rpcEndpoint);
+    this.chainType = chainType;
   }
 
   /**
@@ -226,7 +232,8 @@ export class GoodrFunSDK {
     const tx = new Transaction();
 
     const donationDestination = getDonationDestinationFromName(
-      params.donationDestination,
+      this.chainType,
+      DonationDestinationName.NoDonation, // Default tp NoDonation, will update later
     );
 
     const createTokenTx = await this.program.create({
@@ -237,7 +244,8 @@ export class GoodrFunSDK {
       uri: params.metadata.metadataUri,
       donationDestination: donationDestination.address,
       donationAmount: new BN(
-        params.donationAmount * 10 ** this.program.decimals,
+        // params.donationAmount * 10 ** this.program.decimals,
+        0,
       ),
     });
 
