@@ -277,6 +277,19 @@ export class GoodrFunProgramBase {
       .transaction();
   }
 
+  async updateAuthority({
+    authority,
+    newAuthority,
+  }: {
+    authority: PublicKey;
+    newAuthority: PublicKey;
+  }): Promise<Transaction> {
+    return await this.program.methods
+      .updateAuthority(newAuthority)
+      .accountsPartial({ authority, global: this.globalPDA })
+      .transaction();
+  }
+
   /**
    * Adds donation destinations to the global state.
    * @param authority - The authority to add the donation destinations.

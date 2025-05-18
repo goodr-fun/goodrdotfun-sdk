@@ -1,5 +1,5 @@
 {
-  "address": "UJBMB4Tj3ofc4BUgTRcfnQF1oWA3r28s1VukEoi9oMR",
+  "address": "3crLhmrJUVn6P4TA9MiyEzyJsaSukDNcMTcBpSstub3z",
   "metadata": {
     "name": "pump_fun",
     "version": "0.1.0",
@@ -428,6 +428,31 @@
       ]
     },
     {
+      "name": "update_authority",
+      "discriminator": [32, 46, 64, 28, 149, 75, 243, 88],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "new_authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "withdraw",
       "discriminator": [183, 18, 70, 156, 148, 109, 161, 34],
       "accounts": [
@@ -552,6 +577,10 @@
     {
       "name": "TradeEvent",
       "discriminator": [189, 219, 127, 211, 78, 230, 97, 238]
+    },
+    {
+      "name": "UpdateAuthorityEvent",
+      "discriminator": [18, 34, 243, 151, 72, 51, 65, 156]
     }
   ],
   "errors": [
@@ -870,6 +899,18 @@
           {
             "name": "real_sol_reserves",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateAuthorityEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "new_authority",
+            "type": "pubkey"
           }
         ]
       }

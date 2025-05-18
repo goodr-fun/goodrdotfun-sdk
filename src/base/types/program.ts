@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pump_fun.json`.
  */
 export type GoodrFun = {
-  address: 'UJBMB4Tj3ofc4BUgTRcfnQF1oWA3r28s1VukEoi9oMR';
+  address: '3crLhmrJUVn6P4TA9MiyEzyJsaSukDNcMTcBpSstub3z';
   metadata: {
     name: 'pumpFun';
     version: '0.1.0';
@@ -528,6 +528,31 @@ export type GoodrFun = {
       ];
     },
     {
+      name: 'updateAuthority';
+      discriminator: [32, 46, 64, 28, 149, 75, 243, 88];
+      accounts: [
+        {
+          name: 'authority';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'global';
+          writable: true;
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+      ];
+      args: [
+        {
+          name: 'newAuthority';
+          type: 'pubkey';
+        },
+      ];
+    },
+    {
       name: 'withdraw';
       discriminator: [183, 18, 70, 156, 148, 109, 161, 34];
       accounts: [
@@ -722,6 +747,10 @@ export type GoodrFun = {
     {
       name: 'tradeEvent';
       discriminator: [189, 219, 127, 211, 78, 230, 97, 238];
+    },
+    {
+      name: 'updateAuthorityEvent';
+      discriminator: [18, 34, 243, 151, 72, 51, 65, 156];
     },
   ];
   errors: [
@@ -1040,6 +1069,18 @@ export type GoodrFun = {
           {
             name: 'realSolReserves';
             type: 'u64';
+          },
+        ];
+      };
+    },
+    {
+      name: 'updateAuthorityEvent';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'newAuthority';
+            type: 'pubkey';
           },
         ];
       };
