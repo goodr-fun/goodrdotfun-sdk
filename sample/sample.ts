@@ -1,8 +1,9 @@
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import {
   ChainType,
-  DonationDestinationName,
+  getMemeDonationDestinationFromName,
   GoodrFunSDK,
+  MemeDonationDestinationName,
   TokenMetadata,
 } from '../src';
 import bs58 from 'bs58';
@@ -15,7 +16,7 @@ import { TOKEN_DECIMALS } from '../src/base/constant';
 dotenv.config({ path: resolve(__dirname, '.env') });
 
 const main = async () => {
-  const rpcEndpoint = 'https://api.testnet.sonic.game';
+  const rpcEndpoint = 'https://api.devnet.solana.com';
   const sdk = new GoodrFunSDK(ChainType.SONIC, rpcEndpoint);
 
   const walletPublicKey = process.env.WALLET_PUBLIC_KEY; // Set your wallet public key
@@ -36,7 +37,9 @@ const main = async () => {
     ticker: 'DONUTS',
     description: 'DONUTS',
     donationAmount: '50000000',
-    donationDestinationId: 5,
+    donationDestinationId: getMemeDonationDestinationFromName(
+      MemeDonationDestinationName.FarmMeme,
+    ).id,
     imageUrl: 'https://picsum.photos/200/300',
     websiteUrl: 'https://donuts.com',
     twitterUrl: 'https://twitter.com/donuts',
@@ -51,6 +54,7 @@ const main = async () => {
     mint: mint,
     buySolAmount: new BigNumber(0.1).multipliedBy(LAMPORTS_PER_SOL),
     slippageBasisPoints: 500,
+    meme: MemeDonationDestinationName.OGMeme,
     metadata: {
       name: 'DONUTS',
       symbol: 'DONUTS',
@@ -81,10 +85,10 @@ const main = async () => {
     `Token address: ${mint.publicKey.toBase58()}`,
   );
 
-  // Sell 100000000 tokens
+  // Sell 500000 tokens
   const sellResult = await sdk.sell(wallet, {
     mint: mint.publicKey,
-    tokenAmount: new BigNumber(100000000).multipliedBy(10 ** TOKEN_DECIMALS),
+    tokenAmount: new BigNumber(500000).multipliedBy(10 ** TOKEN_DECIMALS),
     slippageBasisPoints: 500,
   });
 

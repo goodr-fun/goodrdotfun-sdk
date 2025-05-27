@@ -1,9 +1,5 @@
-import {
-  Keypair,
-  PublicKey,
-  VersionedTransactionResponse,
-} from '@solana/web3.js';
-import { DonationDestinationName } from '../base/donation-destination';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { MemeDonationDestinationName } from '../base/meme-donation-destination';
 
 export type DonationAmount =
   | 50_000_000
@@ -22,8 +18,7 @@ export type CreateAndBuyParams = {
   mint: Keypair;
   metadata: TokenCreationMetadata;
   buySolAmount: BigNumber;
-  // donationDestination: DonationDestinationName;
-  // donationAmount: DonationAmount;
+  meme: MemeDonationDestinationName;
   slippageBasisPoints: number;
 };
 

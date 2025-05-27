@@ -21,11 +21,8 @@ import {
   GlobalAccount,
   BondingCurveAccount,
   ChainType,
+  getMemeDonationDestinationFromName,
 } from './types';
-import {
-  DonationDestinationName,
-  getDonationDestinationFromName,
-} from './base/donation-destination';
 import { BN } from 'bn.js';
 import { DEFAULT_SLIPPAGE_BASIS_POINTS, TOKEN_DECIMALS } from './base/constant';
 import { sendTx } from './base/helpers/helper';
@@ -231,10 +228,7 @@ export class GoodrFunSDK {
         : params.slippageBasisPoints;
     const tx = new Transaction();
 
-    const donationDestination = getDonationDestinationFromName(
-      this.chainType,
-      DonationDestinationName.NoDonation, // Default tp NoDonation, will update later
-    );
+    const memeDestination = getMemeDonationDestinationFromName(params.meme);
 
     const createTokenTx = await this.program.create({
       user: creator,
@@ -242,10 +236,9 @@ export class GoodrFunSDK {
       name: params.metadata.name,
       symbol: params.metadata.symbol,
       uri: params.metadata.metadataUri,
-      donationDestination: donationDestination.address,
+      donationDestination: memeDestination.address,
       donationAmount: new BN(
-        // params.donationAmount * 10 ** this.program.decimals,
-        0,
+        memeDestination.donationAmount * 10 ** this.program.decimals,
       ),
     });
 
