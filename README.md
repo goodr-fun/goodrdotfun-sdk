@@ -10,17 +10,25 @@ npm install goodrdotfun-sdk
 
 ## Usage
 
+Currently we are supporting Solana and [SonicSVM](https://www.sonic.game/) only
+
 Here's a complete example showing how to create a token, buy, and sell using the SDK:
 
 ```typescript
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { GoodrFunSDK, TokenMetadata } from 'goodrdotfun-sdk';
+import {
+  GoodrFunSDK,
+  TokenMetadata,
+  MemeDonationDestinationName,
+  getMemeDonationDestinationFromName,
+  ChainType,
+} from 'goodrdotfun-sdk';
 import { BigNumber } from 'bignumber.js';
 
 const main = async () => {
   // Initialize SDK with RPC endpoint
-  const rpcEndpoint = 'https://api.testnet.sonic.game'; // Use appropriate endpoint
-  const sdk = new GoodrFunSDK(rpcEndpoint);
+  const rpcEndpoint = 'https://api.testnet.sonic.game'; // Use appropriate endpoint (Solana or Sonic SVM)
+  const sdk = new GoodrFunSDK(ChainType.SONIC, rpcEndpoint);
 
   // Set up your wallet (using environment variables for security)
   const walletPublicKey = process.env.WALLET_PUBLIC_KEY;
@@ -43,8 +51,10 @@ const main = async () => {
     name: 'DONUTS',
     ticker: 'DONUTS',
     description: 'DONUTS',
-    donationAmount: '0',
-    donationDestinationId: 14, // Please hard code this one, currently support NoDonation only
+    donationAmount: '50000000',
+    donationDestinationId: getMemeDonationDestinationFromName(
+      MemeDonationDestinationName.FarmMeme,
+    ).id,
     imageUrl: 'https://picsum.photos/200/300',
     websiteUrl: 'https://donuts.com',
     twitterUrl: 'https://twitter.com/donuts',
@@ -59,6 +69,7 @@ const main = async () => {
     mint: mint,
     buySolAmount: new BigNumber(0.1).multipliedBy(LAMPORTS_PER_SOL),
     slippageBasisPoints: 500,
+    meme: MemeDonationDestinationName.OGMeme,
     metadata: {
       name: 'DONUTS',
       symbol: 'DONUTS',
