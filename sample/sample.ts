@@ -32,14 +32,15 @@ const main = async () => {
   });
 
   const mint = Keypair.generate();
+  const donation = getMemeDonationDestinationFromName(
+    MemeDonationDestinationName.FarmMeme,
+  );
   const tokenMetadata = new TokenMetadata({
     name: 'DONUTS',
     ticker: 'DONUTS',
     description: 'DONUTS',
-    donationAmount: '50000000',
-    donationDestinationId: getMemeDonationDestinationFromName(
-      MemeDonationDestinationName.FarmMeme,
-    ).id,
+    donationAmount: donation.donationAmount.toString(),
+    donationDestinationId: donation.id,
     imageUrl: 'https://picsum.photos/200/300',
     websiteUrl: 'https://donuts.com',
     twitterUrl: 'https://twitter.com/donuts',
@@ -54,7 +55,7 @@ const main = async () => {
     mint: mint,
     buySolAmount: new BigNumber(0.1).multipliedBy(LAMPORTS_PER_SOL),
     slippageBasisPoints: 500,
-    meme: MemeDonationDestinationName.OGMeme,
+    meme: donation.name,
     metadata: {
       name: 'DONUTS',
       symbol: 'DONUTS',

@@ -43,33 +43,31 @@ const main = async () => {
     secretKey: bs58.decode(walletPrivateKey),
   });
 
-  // Generate a new mint for the token
   const mint = Keypair.generate();
-
-  // Create token metadata
+  const donation = getMemeDonationDestinationFromName(
+    MemeDonationDestinationName.FarmMeme,
+  );
   const tokenMetadata = new TokenMetadata({
     name: 'DONUTS',
     ticker: 'DONUTS',
     description: 'DONUTS',
-    donationAmount: '50000000',
-    donationDestinationId: getMemeDonationDestinationFromName(
-      MemeDonationDestinationName.FarmMeme,
-    ).id,
+    donationAmount: donation.donationAmount.toString(),
+    donationDestinationId: donation.id,
     imageUrl: 'https://picsum.photos/200/300',
     websiteUrl: 'https://donuts.com',
     twitterUrl: 'https://twitter.com/donuts',
     telegramUrl: 'https://t.me/donuts',
   }).toJSON();
+  // Update this json to ipfs or any storage then get the url. In this test i will use a fixed url
 
-  // Your metadata URI (should point to hosted metadata JSON)
-  const metadataUri = 'https://your-metadata-host.com/metadata.json';
+  const metadataUri =
+    'https://goodr-fun.s3.us-east-1.amazonaws.com/metadata/1745847137445-DONUTS';
 
-  // Create and buy tokens in one transaction
   const result = await sdk.createAndBuy(wallet, {
     mint: mint,
     buySolAmount: new BigNumber(0.1).multipliedBy(LAMPORTS_PER_SOL),
     slippageBasisPoints: 500,
-    meme: MemeDonationDestinationName.OGMeme,
+    meme: donation.name,
     metadata: {
       name: 'DONUTS',
       symbol: 'DONUTS',
