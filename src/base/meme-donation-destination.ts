@@ -19,7 +19,7 @@ export const MEME_DONATION_DESTINATIONS: Record<
   17: {
     id: 17,
     name: MemeDonationDestinationName.FarmMeme,
-    donationAmount: 300_000_000,
+    donationAmount: 308_000_000,
     address: new PublicKey('66R8vBGPgzBLw2PRb8cYyN3UqjbZDCvHNApsmWaciCid'),
   },
   18: {
