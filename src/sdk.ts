@@ -29,6 +29,7 @@ import { sendTx } from './base/helpers/helper';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { BigNumber } from 'bignumber.js';
 import { Idl } from '@coral-xyz/anchor';
+import { ProgramErrorCodeTs, ProgramError } from './base/types/common';
 
 /**
  * SDK for interacting with the GoodrFun program on Solana and Sonic
@@ -284,7 +285,21 @@ export class GoodrFunSDK {
       creator.publicKey,
       [creator],
     );
-
+    if (!result.success) {
+      if (result.results) checkProgramErrorInLogs(result.results);
+      if (hasErrorMessage(result.error)) {
+        for (const [code, errorMsg] of Object.entries(ProgramErrorCodeTs)) {
+          if (result.error.message.includes(errorMsg)) {
+            throw new ProgramError(
+              code as keyof typeof ProgramErrorCodeTs,
+              errorMsg,
+            );
+          }
+        }
+      }
+    } else {
+      if (result.results) checkProgramErrorInLogs(result.results);
+    }
     return result;
   }
 
@@ -329,6 +344,21 @@ export class GoodrFunSDK {
       creator.publicKey,
       [creator],
     );
+    if (!result.success) {
+      if (result.results) checkProgramErrorInLogs(result.results);
+      if (hasErrorMessage(result.error)) {
+        for (const [code, errorMsg] of Object.entries(ProgramErrorCodeTs)) {
+          if (result.error.message.includes(errorMsg)) {
+            throw new ProgramError(
+              code as keyof typeof ProgramErrorCodeTs,
+              errorMsg,
+            );
+          }
+        }
+      }
+    } else {
+      if (result.results) checkProgramErrorInLogs(result.results);
+    }
     return result;
   }
 
@@ -499,4 +529,23 @@ export class GoodrFunSDK {
       totalSupply: totalSupplyBN,
     };
   }
+}
+
+function checkProgramErrorInLogs(results?: any) {
+  if (!results || !results.meta || !results.meta.logMessages) return;
+  const logs: string[] = results.meta.logMessages;
+  for (const [code, errorMsg] of Object.entries(ProgramErrorCodeTs)) {
+    if (logs.some(log => log.includes(errorMsg))) {
+      throw new ProgramError(code as keyof typeof ProgramErrorCodeTs, errorMsg);
+    }
+  }
+}
+
+function hasErrorMessage(e: unknown): e is { message: string } {
+  return (
+    typeof e === 'object' &&
+    e !== null &&
+    'message' in e &&
+    typeof (e as any).message === 'string'
+  );
 }

@@ -240,6 +240,37 @@ const createListenerId = sdk.addOnCreateEvent((event, slot, signature) => {
 sdk.removeEventListener(tradeListenerId, createListenerId);
 ```
 
+## Error Handling Example
+
+When using the SDK, you can catch and handle program errors (such as slippage or authorization errors) using a try/catch block. The SDK will throw a `ProgramError` (extending JavaScript's `Error`) for any known on-chain error, with a `code` and `message` property.
+
+```typescript
+import { GoodrFunSDK } from 'goodrdotfun-sdk'; // adjust import as needed
+import { ProgramError } from 'goodrdotfun-sdk/src/base/types/common'; // adjust path as needed
+
+async function buyTokens(sdk, buyParams) {
+  try {
+    const result = await sdk.buy(wallet, buyParams);
+    console.log('Buy successful:', result);
+  } catch (e) {
+    if (e instanceof ProgramError) {
+      // This is a program error from the Solana program
+      console.error('Program error code:', e.code); // e.g., 'TooMuchSolRequired'
+      console.error('Program error message:', e.message); // e.g., 'slippage: Too much SOL required to buy the given amount of tokens.'
+      // Handle specific error codes if needed
+      if (e.code === 'TooMuchSolRequired') {
+        // Handle slippage error
+      }
+    } else {
+      // This is some other error (network, JS, etc.)
+      console.error('Other error:', e);
+    }
+  }
+}
+```
+
+You can use this pattern for any SDK method that may throw a program error (e.g., `buy`, `sell`, `buyExactToken`, etc.).
+
 ## License
 
 MIT

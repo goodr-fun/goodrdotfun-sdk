@@ -170,3 +170,30 @@ export interface TransactionResult {
   results?: VersionedTransactionResponse;
   success: boolean;
 }
+
+export enum ProgramErrorCodeTs {
+  AlreadyInitialized = 'The program is already initialized.',
+  NotAuthorized = 'The given account is not authorized to execute this instruction.',
+  TooMuchSolRequired = 'slippage: Too much SOL required to buy the given amount of tokens.',
+  TooLittleSolReceived = 'slippage: Too little SOL received to sell the given amount of tokens.',
+  MintDoesNotMatchBondingCurve = 'The mint does not match the bonding curve.',
+  BondingCurveComplete = 'The bonding curve has completed and liquidity migrated to raydium.',
+  BondingCurveNotComplete = 'The bonding curve has not completed yet.',
+  NotInitialized = 'The program is not initialized.',
+  NotAuthorizedDonationDestination = 'The donation destination is not authorized.',
+  InsufficientTokens = 'Insufficient Tokens',
+  MinBuy = 'Min buy is 1 Token',
+  MinSell = 'Min sell is 1 Token',
+  InsufficientSOL = 'Insufficient SOL',
+  InvalidMintAccountSpace = 'Invalid Mint Account Space',
+  CantInitializeMetadataPointer = "Can't Initialize Metadata Pointer",
+}
+
+export class ProgramError extends Error {
+  code: keyof typeof ProgramErrorCodeTs;
+  constructor(code: keyof typeof ProgramErrorCodeTs, message?: string) {
+    super(message || ProgramErrorCodeTs[code]);
+    this.name = 'ProgramError';
+    this.code = code;
+  }
+}

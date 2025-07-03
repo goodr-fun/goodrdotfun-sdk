@@ -16,7 +16,7 @@ import { TOKEN_DECIMALS } from '../src/base/constant';
 dotenv.config({ path: resolve(__dirname, '.env') });
 
 const main = async () => {
-  const rpcEndpoint = 'https://api.devnet.solana.com';
+  const rpcEndpoint = 'https://api.testnet.sonic.game';
   const sdk = new GoodrFunSDK(ChainType.SONIC, rpcEndpoint);
 
   const walletPublicKey = process.env.WALLET_PUBLIC_KEY; // Set your wallet public key
