@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pump_fun.json`.
  */
 export type GoodrFun = {
-  address: 'Eg61P5cv9excHmbVWsT3YSF9FDEvRvYo8z2JhaES7SkX';
+  address: 'D3A3qyRtoha8DmnhP4zrz4JRUmWRB8pWgtLYktsj8Tip';
   metadata: {
     name: 'pumpFun';
     version: '0.1.0';
@@ -46,7 +46,6 @@ export type GoodrFun = {
       accounts: [
         {
           name: 'global';
-          writable: true;
           pda: {
             seeds: [
               {
@@ -228,6 +227,384 @@ export type GoodrFun = {
       ];
     },
     {
+      name: 'buyWithSpl';
+      discriminator: [86, 194, 224, 114, 187, 0, 129, 53];
+      accounts: [
+        {
+          name: 'global';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 108, 111, 98, 97, 108];
+              },
+            ];
+          };
+        },
+        {
+          name: 'mint';
+          writable: true;
+        },
+        {
+          name: 'sonicMint';
+        },
+        {
+          name: 'creatorWallet';
+          writable: true;
+        },
+        {
+          name: 'operatingWallet';
+          writable: true;
+        },
+        {
+          name: 'userSonicAccount';
+          writable: true;
+        },
+        {
+          name: 'creatorSonicAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'creatorWallet';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'sonicMint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'operatingSonicAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'operatingWallet';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'sonicMint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'bondingCurveTokenAccount';
+          writable: true;
+        },
+        {
+          name: 'bondingCurveSonicAccount';
+          writable: true;
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101,
+                  95,
+                  118,
+                  50,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+          };
+        },
+        {
+          name: 'userTokenAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'user';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'user';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+        {
+          name: 'rent';
+          address: 'SysvarRent111111111111111111111111111111111';
+        },
+      ];
+      args: [
+        {
+          name: 'amount';
+          type: 'u64';
+        },
+        {
+          name: 'maxCostSonic';
+          type: 'u64';
+        },
+      ];
+    },
+    {
       name: 'create';
       discriminator: [24, 30, 200, 40, 5, 28, 7, 119];
       accounts: [
@@ -238,7 +615,6 @@ export type GoodrFun = {
         },
         {
           name: 'global';
-          writable: true;
           pda: {
             seeds: [
               {
@@ -335,6 +711,122 @@ export type GoodrFun = {
       ];
     },
     {
+      name: 'createWithSpl';
+      discriminator: [196, 31, 67, 197, 71, 205, 128, 242];
+      accounts: [
+        {
+          name: 'user';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'global';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 108, 111, 98, 97, 108];
+              },
+            ];
+          };
+        },
+        {
+          name: 'sonicMint';
+        },
+        {
+          name: 'mint';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'donationDestination';
+          writable: true;
+        },
+        {
+          name: 'associatedBondingCurve';
+          writable: true;
+        },
+        {
+          name: 'associatedDonationDestination';
+          writable: true;
+        },
+        {
+          name: 'bondingCurveSonicAccount';
+          writable: true;
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101,
+                  95,
+                  118,
+                  50,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+          };
+        },
+        {
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+        },
+        {
+          name: 'splTokenProgram';
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+        {
+          name: 'rent';
+          address: 'SysvarRent111111111111111111111111111111111';
+        },
+      ];
+      args: [
+        {
+          name: 'name';
+          type: 'string';
+        },
+        {
+          name: 'symbol';
+          type: 'string';
+        },
+        {
+          name: 'uri';
+          type: 'string';
+        },
+        {
+          name: 'donationAmount';
+          type: 'u64';
+        },
+      ];
+    },
+    {
       name: 'initialize';
       discriminator: [175, 175, 109, 31, 13, 152, 155, 237];
       accounts: [
@@ -395,7 +887,14 @@ export type GoodrFun = {
       accounts: [
         {
           name: 'global';
-          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 108, 111, 98, 97, 108];
+              },
+            ];
+          };
         },
         {
           name: 'mint';
@@ -479,6 +978,384 @@ export type GoodrFun = {
       ];
     },
     {
+      name: 'sellWithSpl';
+      discriminator: [138, 14, 220, 187, 19, 0, 46, 94];
+      accounts: [
+        {
+          name: 'global';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 108, 111, 98, 97, 108];
+              },
+            ];
+          };
+        },
+        {
+          name: 'mint';
+          writable: true;
+        },
+        {
+          name: 'sonicMint';
+        },
+        {
+          name: 'operatingWallet';
+          writable: true;
+        },
+        {
+          name: 'creatorWallet';
+          writable: true;
+        },
+        {
+          name: 'userSonicAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'user';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'sonicMint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'creatorSonicAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'creatorWallet';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'sonicMint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'operatingSonicAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'operatingWallet';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'sonicMint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'bondingCurveTokenAccount';
+          writable: true;
+        },
+        {
+          name: 'bondingCurveSonicAccount';
+          writable: true;
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101,
+                  95,
+                  118,
+                  50,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+          };
+        },
+        {
+          name: 'userTokenAccount';
+          writable: true;
+        },
+        {
+          name: 'user';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+        {
+          name: 'rent';
+          address: 'SysvarRent111111111111111111111111111111111';
+        },
+      ];
+      args: [
+        {
+          name: 'amount';
+          type: 'u64';
+        },
+        {
+          name: 'minSonicOutput';
+          type: 'u64';
+        },
+      ];
+    },
+    {
       name: 'setParams';
       discriminator: [27, 234, 178, 52, 147, 2, 187, 141];
       accounts: [
@@ -524,6 +1401,36 @@ export type GoodrFun = {
         {
           name: 'creatorFeeBasisPoints';
           type: 'u64';
+        },
+        {
+          name: 'sonicMint';
+          type: {
+            option: 'pubkey';
+          };
+        },
+        {
+          name: 'sonicDecimals';
+          type: {
+            option: 'u8';
+          };
+        },
+        {
+          name: 'sonicInitialVirtualTokenReserves';
+          type: {
+            option: 'u64';
+          };
+        },
+        {
+          name: 'sonicInitialVirtualBaseReserves';
+          type: {
+            option: 'u64';
+          };
+        },
+        {
+          name: 'sonicInitialRealTokenReserves';
+          type: {
+            option: 'u64';
+          };
         },
       ];
     },
@@ -720,11 +1627,283 @@ export type GoodrFun = {
       ];
       args: [];
     },
+    {
+      name: 'withdrawSpl';
+      discriminator: [181, 154, 94, 86, 62, 115, 6, 186];
+      accounts: [
+        {
+          name: 'global';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 108, 111, 98, 97, 108];
+              },
+            ];
+          };
+        },
+        {
+          name: 'mint';
+          writable: true;
+        },
+        {
+          name: 'sonicMint';
+        },
+        {
+          name: 'bondingCurveTokenAccount';
+          writable: true;
+        },
+        {
+          name: 'bondingCurveSonicAccount';
+          writable: true;
+        },
+        {
+          name: 'authorityTokenAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'user';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'authoritySonicAccount';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'user';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'sonicMint';
+              },
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101,
+                  95,
+                  118,
+                  50,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'mint';
+              },
+            ];
+          };
+        },
+        {
+          name: 'user';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+        {
+          name: 'rent';
+          address: 'SysvarRent111111111111111111111111111111111';
+        },
+      ];
+      args: [];
+    },
   ];
   accounts: [
     {
       name: 'bondingCurve';
       discriminator: [23, 183, 248, 55, 96, 216, 172, 96];
+    },
+    {
+      name: 'bondingCurveV2';
+      discriminator: [164, 39, 209, 40, 144, 178, 79, 52];
     },
     {
       name: 'global';
@@ -829,6 +2008,26 @@ export type GoodrFun = {
       name: 'cantInitializeMetadataPointer';
       msg: "Can't Initialize Metadata Pointer";
     },
+    {
+      code: 6015;
+      name: 'invalidSonicMint';
+      msg: 'The SONIC mint does not match the global configuration.';
+    },
+    {
+      code: 6016;
+      name: 'tooMuchSonicRequired';
+      msg: 'slippage: Too much SONIC required to buy the given amount of tokens.';
+    },
+    {
+      code: 6017;
+      name: 'tooLittleSonicReceived';
+      msg: 'slippage: Too little SONIC received to sell the given amount of tokens.';
+    },
+    {
+      code: 6018;
+      name: 'insufficientSonic';
+      msg: 'Insufficient SONIC tokens';
+    },
   ];
   types: [
     {
@@ -858,6 +2057,50 @@ export type GoodrFun = {
           },
           {
             name: 'realSolReserves';
+            type: 'u64';
+          },
+          {
+            name: 'tokenTotalSupply';
+            type: 'u64';
+          },
+          {
+            name: 'complete';
+            type: 'bool';
+          },
+        ];
+      };
+    },
+    {
+      name: 'bondingCurveV2';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'bump';
+            type: 'u8';
+          },
+          {
+            name: 'creator';
+            type: 'pubkey';
+          },
+          {
+            name: 'baseCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'virtualTokenReserves';
+            type: 'u64';
+          },
+          {
+            name: 'virtualBaseReserves';
+            type: 'u64';
+          },
+          {
+            name: 'realTokenReserves';
+            type: 'u64';
+          },
+          {
+            name: 'realBaseReserves';
             type: 'u64';
           },
           {
@@ -981,6 +2224,26 @@ export type GoodrFun = {
             type: 'u64';
           },
           {
+            name: 'sonicMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'sonicDecimals';
+            type: 'u8';
+          },
+          {
+            name: 'sonicInitialVirtualTokenReserves';
+            type: 'u64';
+          },
+          {
+            name: 'sonicInitialVirtualBaseReserves';
+            type: 'u64';
+          },
+          {
+            name: 'sonicInitialRealTokenReserves';
+            type: 'u64';
+          },
+          {
             name: 'donationDestinations';
             type: {
               vec: 'pubkey';
@@ -1069,6 +2332,12 @@ export type GoodrFun = {
           {
             name: 'realSolReserves';
             type: 'u64';
+          },
+          {
+            name: 'baseCurrencyMint';
+            type: {
+              option: 'pubkey';
+            };
           },
         ];
       };

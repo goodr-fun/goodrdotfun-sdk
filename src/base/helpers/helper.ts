@@ -27,6 +27,7 @@ import {
   TransactionMessage,
 } from '@solana/web3.js';
 import bs58 from 'bs58';
+import { BigNumber } from 'bignumber.js';
 import { DEFAULT_FINALITY, DEFAULT_COMMITMENT } from '../constant';
 import { PriorityFee, TransactionResult } from '../types/common';
 

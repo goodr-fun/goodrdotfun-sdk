@@ -1,5 +1,5 @@
 {
-  "address": "Eg61P5cv9excHmbVWsT3YSF9FDEvRvYo8z2JhaES7SkX",
+  "address": "D3A3qyRtoha8DmnhP4zrz4JRUmWRB8pWgtLYktsj8Tip",
   "metadata": {
     "name": "pump_fun",
     "version": "0.1.0",
@@ -40,7 +40,6 @@
       "accounts": [
         {
           "name": "global",
-          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -152,6 +151,196 @@
       ]
     },
     {
+      "name": "buy_with_spl",
+      "discriminator": [86, 194, 224, 114, 187, 0, 129, 53],
+      "accounts": [
+        {
+          "name": "global",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 108, 111, 98, 97, 108]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "sonic_mint"
+        },
+        {
+          "name": "creator_wallet",
+          "writable": true
+        },
+        {
+          "name": "operating_wallet",
+          "writable": true
+        },
+        {
+          "name": "user_sonic_account",
+          "writable": true
+        },
+        {
+          "name": "creator_sonic_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "creator_wallet"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sonic_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "operating_sonic_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "operating_wallet"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sonic_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "bonding_curve_token_account",
+          "writable": true
+        },
+        {
+          "name": "bonding_curve_sonic_account",
+          "writable": true
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98, 111, 110, 100, 105, 110, 103, 95, 99, 117, 114, 118, 101,
+                  95, 118, 50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "max_cost_sonic",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "create",
       "discriminator": [24, 30, 200, 40, 5, 28, 7, 119],
       "accounts": [
@@ -162,7 +351,6 @@
         },
         {
           "name": "global",
-          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -217,6 +405,108 @@
         {
           "name": "token_program",
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "donation_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_with_spl",
+      "discriminator": [196, 31, 67, 197, 71, 205, 128, 242],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 108, 111, 98, 97, 108]
+              }
+            ]
+          }
+        },
+        {
+          "name": "sonic_mint"
+        },
+        {
+          "name": "mint",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "donation_destination",
+          "writable": true
+        },
+        {
+          "name": "associated_bonding_curve",
+          "writable": true
+        },
+        {
+          "name": "associated_donation_destination",
+          "writable": true
+        },
+        {
+          "name": "bonding_curve_sonic_account",
+          "writable": true
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98, 111, 110, 100, 105, 110, 103, 95, 99, 117, 114, 118, 101,
+                  95, 118, 50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "spl_token_program"
         },
         {
           "name": "system_program",
@@ -307,7 +597,14 @@
       "accounts": [
         {
           "name": "global",
-          "writable": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 108, 111, 98, 97, 108]
+              }
+            ]
+          }
         },
         {
           "name": "mint",
@@ -379,6 +676,196 @@
       ]
     },
     {
+      "name": "sell_with_spl",
+      "discriminator": [138, 14, 220, 187, 19, 0, 46, 94],
+      "accounts": [
+        {
+          "name": "global",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 108, 111, 98, 97, 108]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "sonic_mint"
+        },
+        {
+          "name": "operating_wallet",
+          "writable": true
+        },
+        {
+          "name": "creator_wallet",
+          "writable": true
+        },
+        {
+          "name": "user_sonic_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sonic_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "creator_sonic_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "creator_wallet"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sonic_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "operating_sonic_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "operating_wallet"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sonic_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "bonding_curve_token_account",
+          "writable": true
+        },
+        {
+          "name": "bonding_curve_sonic_account",
+          "writable": true
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98, 111, 110, 100, 105, 110, 103, 95, 99, 117, 114, 118, 101,
+                  95, 118, 50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "min_sonic_output",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "set_params",
       "discriminator": [27, 234, 178, 52, 147, 2, 187, 141],
       "accounts": [
@@ -424,6 +911,36 @@
         {
           "name": "creator_fee_basis_points",
           "type": "u64"
+        },
+        {
+          "name": "sonic_mint",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "sonic_decimals",
+          "type": {
+            "option": "u8"
+          }
+        },
+        {
+          "name": "sonic_initial_virtual_token_reserves",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "sonic_initial_virtual_base_reserves",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "sonic_initial_real_token_reserves",
+          "type": {
+            "option": "u64"
+          }
         }
       ]
     },
@@ -549,12 +1066,154 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "withdraw_spl",
+      "discriminator": [181, 154, 94, 86, 62, 115, 6, 186],
+      "accounts": [
+        {
+          "name": "global",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 108, 111, 98, 97, 108]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "sonic_mint"
+        },
+        {
+          "name": "bonding_curve_token_account",
+          "writable": true
+        },
+        {
+          "name": "bonding_curve_sonic_account",
+          "writable": true
+        },
+        {
+          "name": "authority_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "authority_sonic_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
+                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
+                  245, 133, 126, 255, 0, 169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sonic_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98, 111, 110, 100, 105, 110, 103, 95, 99, 117, 114, 118, 101,
+                  95, 118, 50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
     {
       "name": "BondingCurve",
       "discriminator": [23, 183, 248, 55, 96, 216, 172, 96]
+    },
+    {
+      "name": "BondingCurveV2",
+      "discriminator": [164, 39, 209, 40, 144, 178, 79, 52]
     },
     {
       "name": "Global",
@@ -658,6 +1317,26 @@
       "code": 6014,
       "name": "CantInitializeMetadataPointer",
       "msg": "Can't Initialize Metadata Pointer"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidSonicMint",
+      "msg": "The SONIC mint does not match the global configuration."
+    },
+    {
+      "code": 6016,
+      "name": "TooMuchSonicRequired",
+      "msg": "slippage: Too much SONIC required to buy the given amount of tokens."
+    },
+    {
+      "code": 6017,
+      "name": "TooLittleSonicReceived",
+      "msg": "slippage: Too little SONIC received to sell the given amount of tokens."
+    },
+    {
+      "code": 6018,
+      "name": "InsufficientSonic",
+      "msg": "Insufficient SONIC tokens"
     }
   ],
   "types": [
@@ -688,6 +1367,50 @@
           },
           {
             "name": "real_sol_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "token_total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "complete",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BondingCurveV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "base_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "virtual_base_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "real_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "real_base_reserves",
             "type": "u64"
           },
           {
@@ -811,6 +1534,26 @@
             "type": "u64"
           },
           {
+            "name": "sonic_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "sonic_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "sonic_initial_virtual_token_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "sonic_initial_virtual_base_reserves",
+            "type": "u64"
+          },
+          {
+            "name": "sonic_initial_real_token_reserves",
+            "type": "u64"
+          },
+          {
             "name": "donation_destinations",
             "type": {
               "vec": "pubkey"
@@ -899,6 +1642,12 @@
           {
             "name": "real_sol_reserves",
             "type": "u64"
+          },
+          {
+            "name": "base_currency_mint",
+            "type": {
+              "option": "pubkey"
+            }
           }
         ]
       }

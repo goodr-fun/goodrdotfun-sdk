@@ -16,6 +16,9 @@ import {
   CreateAndBuyParams,
   BuyParams,
   SellParams,
+  CreateAndBuyWithSonicParams,
+  BuyWithSonicParams,
+  SellWithSonicParams,
   PriceData,
   TokenState,
   GlobalAccount,
@@ -250,7 +253,7 @@ export class GoodrFunSDK {
         await this.program.calculateBuyTokenAmount({
           mint: params.mint.publicKey,
           amountSol: new BN(params.buySolAmount.toNumber()),
-          slippage: slippageBasisPoints,
+          slippage: slippageBasisPoints / 100, // Convert basis points to percentage
         });
 
       const initialBuyTx = await this.program.buy({
@@ -384,6 +387,238 @@ export class GoodrFunSDK {
     return sellTokenTx;
   }
 
+  // SONIC-specific methods
+
+  /**
+   * Creates a new token with SONIC and buys tokens in a single transaction
+   * @param creator - The keypair of the creator
+   * @param params - Parameters for creating and buying tokens with SONIC
+   * @returns Transaction result containing signature and slot
+   */
+  async createAndBuyWithSonic(
+    creator: Keypair,
+    params: CreateAndBuyWithSonicParams,
+  ): Promise<TransactionResult> {
+    const tx = await this.createAndBuyWithSonicTx(creator.publicKey, params);
+    const hash = await this.program.connection.getLatestBlockhash();
+    tx.feePayer = creator.publicKey;
+    tx.recentBlockhash = hash.blockhash;
+
+    const result = await sendTx(
+      this.program.connection,
+      tx,
+      creator.publicKey,
+      [creator, params.mint],
+    );
+    return result;
+  }
+
+  /**
+   * Creates a transaction for creating a new token with SONIC and buying tokens
+   * @param creator - The public key of the creator
+   * @param params - Parameters for creating and buying tokens with SONIC
+   * @returns Transaction object ready to be signed and sent
+   */
+  async createAndBuyWithSonicTx(
+    creator: PublicKey,
+    params: CreateAndBuyWithSonicParams,
+  ): Promise<Transaction> {
+    const slippageBasisPoints =
+      params.slippageBasisPoints <= 0
+        ? DEFAULT_SLIPPAGE_BASIS_POINTS
+        : params.slippageBasisPoints;
+    const tx = new Transaction();
+
+    const memeDestination = getMemeDonationDestinationFromName(params.meme);
+
+    const createTokenTx = await this.program.createWithSpl({
+      user: creator,
+      mint: params.mint,
+      sonicMint: params.baseCurrencyMint,
+      name: params.metadata.name,
+      symbol: params.metadata.symbol,
+      uri: params.metadata.metadataUri,
+      donationDestination: memeDestination.address,
+      donationAmount: new BN(
+        memeDestination.donationAmount * 10 ** this.program.decimals,
+      ),
+    });
+
+    tx.add(createTokenTx);
+
+    if (params.buySonicAmount.gt(0)) {
+      const { amountToken, maxCostSonic } =
+        await this.program.calculateBuyTokenAmountWithSpl({
+          mint: params.mint.publicKey,
+          sonicMint: params.baseCurrencyMint,
+          amountSonic: new BN(params.buySonicAmount.toNumber()),
+          slippage: slippageBasisPoints / 100, // Convert basis points to percentage
+        });
+
+      const initialBuyTx = await this.program.buyWithSpl({
+        user: creator,
+        mint: params.mint.publicKey,
+        sonicMint: params.baseCurrencyMint,
+        amount: amountToken,
+        maxCostSonic: maxCostSonic,
+        creatorWallet: creator,
+      });
+
+      tx.add(initialBuyTx);
+    }
+
+    return tx;
+  }
+
+  /**
+   * Buys tokens for a given amount of SONIC
+   * @param creator - The keypair of the buyer
+   * @param params - Parameters for buying tokens with SONIC
+   * @returns Transaction result containing signature and slot
+   */
+  async buyWithSonic(
+    creator: Keypair,
+    params: BuyWithSonicParams,
+  ): Promise<TransactionResult> {
+    const tx = await this.buyWithSonicTx(creator.publicKey, params);
+    const hash = await this.program.connection.getLatestBlockhash();
+    tx.feePayer = creator.publicKey;
+    tx.recentBlockhash = hash.blockhash;
+
+    const result = await sendTx(
+      this.program.connection,
+      tx,
+      creator.publicKey,
+      [creator],
+    );
+    if (!result.success) {
+      if (result.results) checkProgramErrorInLogs(result.results);
+      if (hasErrorMessage(result.error)) {
+        for (const [code, errorMsg] of Object.entries(ProgramErrorCodeTs)) {
+          if (result.error.message.includes(errorMsg)) {
+            throw new ProgramError(
+              code as keyof typeof ProgramErrorCodeTs,
+              errorMsg,
+            );
+          }
+        }
+      }
+    } else {
+      if (result.results) checkProgramErrorInLogs(result.results);
+    }
+    return result;
+  }
+
+  /**
+   * Creates a transaction for buying tokens with SONIC
+   * @param creator - The public key of the buyer
+   * @param params - Parameters for buying tokens with SONIC
+   * @returns Transaction object ready to be signed and sent
+   */
+  async buyWithSonicTx(
+    creator: PublicKey,
+    params: BuyWithSonicParams,
+  ): Promise<Transaction> {
+    const slippageBasisPoints =
+      params.slippageBasisPoints <= 0
+        ? DEFAULT_SLIPPAGE_BASIS_POINTS
+        : params.slippageBasisPoints;
+
+    const { amountToken, maxCostSonic } =
+      await this.program.calculateBuyTokenAmountWithSpl({
+        mint: params.mint,
+        sonicMint: params.baseCurrencyMint,
+        amountSonic: new BN(params.sonicAmount.toString()),
+        slippage: slippageBasisPoints / 100, // Convert basis points to percentage
+      });
+
+    const buyTokenTx = await this.program.buyWithSpl({
+      user: creator,
+      mint: params.mint,
+      sonicMint: params.baseCurrencyMint,
+      amount: amountToken,
+      maxCostSonic: maxCostSonic,
+      creatorWallet: creator,
+    });
+
+    return buyTokenTx;
+  }
+
+  /**
+   * Sells tokens for SONIC
+   * @param creator - The keypair of the seller
+   * @param params - Parameters for selling tokens for SONIC
+   * @returns Transaction result containing signature and slot
+   */
+  async sellWithSonic(
+    creator: Keypair,
+    params: SellWithSonicParams,
+  ): Promise<TransactionResult> {
+    const tx = await this.sellWithSonicTx(creator.publicKey, params);
+
+    const hash = await this.program.connection.getLatestBlockhash();
+    tx.feePayer = creator.publicKey;
+    tx.recentBlockhash = hash.blockhash;
+
+    const result = await sendTx(
+      this.program.connection,
+      tx,
+      creator.publicKey,
+      [creator],
+    );
+    if (!result.success) {
+      if (result.results) checkProgramErrorInLogs(result.results);
+      if (hasErrorMessage(result.error)) {
+        for (const [code, errorMsg] of Object.entries(ProgramErrorCodeTs)) {
+          if (result.error.message.includes(errorMsg)) {
+            throw new ProgramError(
+              code as keyof typeof ProgramErrorCodeTs,
+              errorMsg,
+            );
+          }
+        }
+      }
+    } else {
+      if (result.results) checkProgramErrorInLogs(result.results);
+    }
+    return result;
+  }
+
+  /**
+   * Creates a transaction for selling tokens for SONIC
+   * @param creator - The public key of the seller
+   * @param params - Parameters for selling tokens for SONIC
+   * @returns Transaction object ready to be signed and sent
+   */
+  async sellWithSonicTx(
+    creator: PublicKey,
+    params: SellWithSonicParams,
+  ): Promise<Transaction> {
+    const slippageBasisPoints =
+      params.slippageBasisPoints <= 0
+        ? DEFAULT_SLIPPAGE_BASIS_POINTS
+        : params.slippageBasisPoints;
+
+    const { amountToken, minSonicReceived } =
+      await this.program.calculateSellTokenAmountWithSpl({
+        mint: params.mint,
+        sonicMint: params.baseCurrencyMint,
+        amountToken: new BN(params.tokenAmount.toString()),
+        slippage: slippageBasisPoints / 100, // Convert basis points to percentage
+      });
+
+    const sellTokenTx = await this.program.sellWithSpl({
+      user: creator,
+      mint: params.mint,
+      sonicMint: params.baseCurrencyMint,
+      amount: amountToken,
+      minSonicReceived: minSonicReceived,
+      creatorWallet: creator,
+    });
+
+    return sellTokenTx;
+  }
+
   async withdraw({ authority, mint }: { authority: Signer; mint: PublicKey }) {
     const withdrawTx = await this.program.withdraw({
       user: authority.publicKey,
@@ -489,6 +724,65 @@ export class GoodrFunSDK {
     };
   }
   /**
+   * Calculates the amount of tokens that can be bought for a given amount of SONIC
+   * @param params - Parameters containing mint, base currency mint and SONIC amount
+   * @returns Object containing the calculated token amount
+   */
+  async calculateBuyTokenAmountWithSonic({
+    mint,
+    baseCurrencyMint,
+    amountSonic,
+  }: {
+    mint: PublicKey;
+    baseCurrencyMint: PublicKey;
+    amountSonic: BigNumber;
+  }): Promise<{
+    amountToken: BigNumber;
+  }> {
+    const result = await this.program.calculateBuyTokenAmountWithSpl({
+      mint,
+      sonicMint: baseCurrencyMint,
+      amountSonic: new BN(amountSonic.toNumber()),
+      slippage: 0,
+    });
+
+    return {
+      amountToken: new BigNumber(result.amountToken.toString()).dividedBy(
+        new BigNumber(10).pow(TOKEN_DECIMALS),
+      ),
+    };
+  }
+
+  /**
+   * Calculates the amount of SONIC that can be received for a given amount of tokens
+   * @param params - Parameters containing mint, base currency mint and token amount
+   * @returns Object containing the calculated SONIC amount
+   */
+  async calculateSellTokenAmountWithSonic({
+    mint,
+    baseCurrencyMint,
+    amountToken,
+  }: {
+    mint: PublicKey;
+    baseCurrencyMint: PublicKey;
+    amountToken: BigNumber;
+  }): Promise<{ amountSonic: BigNumber }> {
+    const result = await this.program.calculateSellTokenAmountWithSpl({
+      mint,
+      sonicMint: baseCurrencyMint,
+      amountToken: new BN(amountToken.toNumber()),
+      slippage: 0,
+    });
+
+    const decimals = 9; // SONIC has 9 decimals
+    return {
+      amountSonic: new BigNumber(result.minSonicReceived.toString()).dividedBy(
+        new BigNumber(10).pow(decimals),
+      ),
+    };
+  }
+
+  /**
    * Gets the current price and market cap data for a token
    * @param mint - The token mint address
    * @returns Price data including current price and market cap
@@ -505,23 +799,49 @@ export class GoodrFunSDK {
    * @returns Token state including price data, bonding curve progress, and total supply
    */
   async getCurrentState(mint: PublicKey): Promise<TokenState> {
-    const bondingCurveState = await this.program.getBondingCurveState({ mint });
-    if (!bondingCurveState) throw new Error('Bonding curve state is not found');
     const globalState = await this.program.getGlobalState();
     if (!globalState) throw new Error('Global state is not found');
 
-    // Calculate price data
-    const priceData =
-      await this.program.getPriceDataFromState(bondingCurveState);
-    const bondingCurveProgress =
-      await this.program.getBondingCurveProgressFromState(
-        bondingCurveState,
-        globalState,
-      );
+    // Try V2 (SONIC) bonding curve first, then V1 (SOL)
+    const bondingCurveState = await this.program.getBondingCurveV2State({
+      mint,
+    });
+    let priceData;
+    let bondingCurveProgress;
+    let totalSupplyBN;
 
-    const totalSupplyBN = new BigNumber(
-      bondingCurveState.tokenTotalSupply.toString(),
-    ).div(new BigNumber(10).pow(this.program.decimals));
+    if (bondingCurveState) {
+      // SONIC token - use V2 methods
+      const priceAndMarketcap = await this.program.getPriceAndMarketcapV2(mint);
+      bondingCurveProgress = await this.program.getBondingCurveProgressV2(mint);
+      totalSupplyBN = new BigNumber(
+        bondingCurveState.tokenTotalSupply.toString(),
+      ).div(new BigNumber(10).pow(this.program.decimals));
+      priceData = {
+        price: new BigNumber(priceAndMarketcap.price),
+        marketCap: new BigNumber(priceAndMarketcap.marketcap),
+        totalSupply: totalSupplyBN,
+      };
+    } else {
+      // Try V1 (SOL) bonding curve
+      const bondingCurveV1State = await this.program.getBondingCurveState({
+        mint,
+      });
+      if (!bondingCurveV1State)
+        throw new Error('Bonding curve state is not found');
+
+      // SOL token - use V1 methods
+      const priceAndMarketcap = await this.program.getPriceAndMarketcap(mint);
+      bondingCurveProgress = await this.program.getBondingCurveProgress(mint);
+      totalSupplyBN = new BigNumber(
+        bondingCurveV1State.tokenTotalSupply.toString(),
+      ).div(new BigNumber(10).pow(this.program.decimals));
+      priceData = {
+        price: new BigNumber(priceAndMarketcap.price),
+        marketCap: new BigNumber(priceAndMarketcap.marketcap),
+        totalSupply: totalSupplyBN,
+      };
+    }
 
     return {
       priceData,
@@ -531,9 +851,11 @@ export class GoodrFunSDK {
   }
 }
 
-function checkProgramErrorInLogs(results?: any) {
-  if (!results || !results.meta || !results.meta.logMessages) return;
-  const logs: string[] = results.meta.logMessages;
+function checkProgramErrorInLogs(results?: unknown) {
+  if (!results || typeof results !== 'object' || results === null) return;
+  const resultsObj = results as { meta?: { logMessages?: string[] } };
+  if (!resultsObj.meta || !resultsObj.meta.logMessages) return;
+  const logs: string[] = resultsObj.meta.logMessages;
   for (const [code, errorMsg] of Object.entries(ProgramErrorCodeTs)) {
     if (logs.some(log => log.includes(errorMsg))) {
       throw new ProgramError(code as keyof typeof ProgramErrorCodeTs, errorMsg);
@@ -546,6 +868,6 @@ function hasErrorMessage(e: unknown): e is { message: string } {
     typeof e === 'object' &&
     e !== null &&
     'message' in e &&
-    typeof (e as any).message === 'string'
+    typeof (e as { message: unknown }).message === 'string'
   );
 }

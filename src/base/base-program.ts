@@ -13,12 +13,14 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
   TOKEN_2022_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import {
   calculateWithSlippageBuy,
   calculateWithSlippageSell,
 } from './helpers/helper';
 import { BondingCurveAccount, GlobalAccount } from './states';
+import { BONDING_CURVE_V2_SEED } from './constant';
 
 export const GLOBAL_SEED = 'global';
 export const BONDING_CURVE_SEED = 'bonding_curve';
@@ -28,6 +30,7 @@ export const MPL_TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 
 export type GlobalState = IdlAccounts<GoodrFun>['global'];
 export type BondingCurveState = IdlAccounts<GoodrFun>['bondingCurve'];
+export type BondingCurveV2State = IdlAccounts<GoodrFun>['bondingCurveV2'];
 
 export type CreateEvent = IdlEvents<GoodrFun>['createEvent'];
 export type CompleteEvent = IdlEvents<GoodrFun>['completeEvent'];
@@ -45,7 +48,7 @@ export class GoodrFunProgramBase {
     });
   }
 
-  get accounts(): any {
+  get accounts(): anchor.Program['account'] {
     return this.program.account;
   }
 
@@ -140,12 +143,51 @@ export class GoodrFunProgramBase {
   }
 
   /**
+   * Returns the bonding curve V2 PDA for a given mint (SONIC operations).
+   * @param mint - The mint to get the bonding curve V2 PDA for.
+   * @returns The bonding curve V2 PDA.
+   */
+  bondingCurveV2PDA({ mint }: { mint: PublicKey }): PublicKey {
+    return PublicKey.findProgramAddressSync(
+      [Buffer.from(BONDING_CURVE_V2_SEED), mint.toBuffer()],
+      this.program.programId,
+    )[0];
+  }
+
+  /**
+   * Helper function to determine token program for a mint.
+   * @param mint - The mint to check
+   * @returns The appropriate token program ID
+   */
+  async getTokenProgramForMint(mint: PublicKey): Promise<PublicKey> {
+    try {
+      const mintInfo = await this.connection.getAccountInfo(mint);
+      if (!mintInfo) {
+        throw new Error('Mint account not found');
+      }
+
+      if (mintInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
+        return TOKEN_2022_PROGRAM_ID;
+      } else if (mintInfo.owner.equals(TOKEN_PROGRAM_ID)) {
+        return TOKEN_PROGRAM_ID;
+      } else {
+        throw new Error('Invalid mint owner program');
+      }
+    } catch (error) {
+      // Default to regular token program if can't determine
+      return TOKEN_PROGRAM_ID;
+    }
+  }
+
+  /**
    * Returns the global state.
    * @returns The global state.
    */
   async getGlobalState(): Promise<GlobalState | null> {
     try {
-      return await this.accounts.global.fetch(this.globalPDA);
+      return await (
+        this.program as unknown as anchor.Program<GoodrFun>
+      ).account.global.fetch(this.globalPDA);
     } catch (error) {
       return null;
     }
@@ -157,15 +199,17 @@ export class GoodrFunProgramBase {
    */
   async getGlobalAccount(): Promise<GlobalAccount | null> {
     try {
-      const globalState = await this.accounts.global.fetch(this.globalPDA);
+      const globalState = await (
+        this.program as unknown as anchor.Program<GoodrFun>
+      ).account.global.fetch(this.globalPDA);
       const globalAccount = new GlobalAccount(
         globalState.initialized,
         globalState.authority,
         globalState.operatingWallet,
-        globalState.initialVirtualTokenReserves.toNumber(),
-        globalState.initialVirtualSolReserves.toNumber(),
-        globalState.initialRealTokenReserves.toNumber(),
-        globalState.tokenTotalSupply.toNumber(),
+        new BigNumber(globalState.initialVirtualTokenReserves.toString()),
+        new BigNumber(globalState.initialVirtualSolReserves.toString()),
+        new BigNumber(globalState.initialRealTokenReserves.toString()),
+        new BigNumber(globalState.tokenTotalSupply.toString()),
         globalState.operatingFeeBasisPoints.toNumber(),
         globalState.creatorFeeBasisPoints.toNumber(),
       );
@@ -186,9 +230,28 @@ export class GoodrFunProgramBase {
     mint: PublicKey;
   }): Promise<BondingCurveState | null> {
     try {
-      return await this.accounts.bondingCurve.fetch(
-        this.bondingCurvePDA({ mint }),
-      );
+      return await (
+        this.program as unknown as anchor.Program<GoodrFun>
+      ).account.bondingCurve.fetch(this.bondingCurvePDA({ mint }));
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Returns the bonding curve V2 state for a given mint (SONIC operations).
+   * @param mint - The mint to get the bonding curve V2 state for.
+   * @returns The bonding curve V2 state.
+   */
+  async getBondingCurveV2State({
+    mint,
+  }: {
+    mint: PublicKey;
+  }): Promise<BondingCurveV2State | null> {
+    try {
+      return await (
+        this.program as unknown as anchor.Program<GoodrFun>
+      ).account.bondingCurveV2.fetch(this.bondingCurveV2PDA({ mint }));
     } catch (error) {
       return null;
     }
@@ -205,9 +268,9 @@ export class GoodrFunProgramBase {
     mint: PublicKey;
   }): Promise<BondingCurveAccount | null> {
     try {
-      const bondingCurveState = await this.accounts.bondingCurve.fetch(
-        this.bondingCurvePDA({ mint }),
-      );
+      const bondingCurveState = await (
+        this.program as unknown as anchor.Program<GoodrFun>
+      ).account.bondingCurve.fetch(this.bondingCurvePDA({ mint }));
       const bondingCurveAccount = new BondingCurveAccount(
         bondingCurveState.creator,
         new BigNumber(bondingCurveState.virtualTokenReserves.toNumber()),
@@ -379,6 +442,83 @@ export class GoodrFunProgramBase {
           TOKEN_2022_PROGRAM_ID,
         ),
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+    tx.add(createTx);
+    const hash = await this.connection.getLatestBlockhash();
+    tx.recentBlockhash = hash.blockhash;
+    tx.feePayer = user;
+    tx.partialSign(mint);
+
+    return tx;
+  }
+
+  /**
+   * Creates a new bonding curve with SPL token (SONIC) as base currency.
+   * @param user - The user to create the bonding curve.
+   * @param mint - The mint to create the bonding curve for.
+   * @param sonicMint - The SONIC mint address.
+   * @param name - The name of the bonding curve.
+   * @param symbol - The symbol of the bonding curve.
+   * @param uri - The URI of the bonding curve.
+   * @param donationDestination - The donation destination for the bonding curve.
+   * @param donationAmount - The donation amount for the bonding curve.
+   * @returns The transaction.
+   */
+  async createWithSpl({
+    user,
+    mint,
+    sonicMint,
+    name,
+    symbol,
+    uri,
+    donationDestination,
+    donationAmount,
+  }: {
+    user: PublicKey;
+    mint: Keypair;
+    sonicMint: PublicKey;
+    name: string;
+    symbol: string;
+    uri: string;
+    donationDestination: PublicKey;
+    donationAmount: anchor.BN;
+  }): Promise<Transaction> {
+    // Determine the token program for SONIC mint
+    const sonicTokenProgram = await this.getTokenProgramForMint(sonicMint);
+
+    const tx = new Transaction();
+    const createTx = await this.program.methods
+      .createWithSpl(name, symbol, uri, donationAmount)
+      .accountsPartial({
+        user,
+        global: this.globalPDA,
+        sonicMint,
+        mint: mint.publicKey,
+        donationDestination: donationDestination,
+        associatedBondingCurve: getAssociatedTokenAddressSync(
+          mint.publicKey,
+          this.bondingCurveV2PDA({ mint: mint.publicKey }),
+          true,
+          TOKEN_2022_PROGRAM_ID,
+        ),
+        associatedDonationDestination: getAssociatedTokenAddressSync(
+          mint.publicKey,
+          donationDestination,
+          true,
+          TOKEN_2022_PROGRAM_ID,
+        ),
+        bondingCurveSonicAccount: getAssociatedTokenAddressSync(
+          sonicMint,
+          this.bondingCurveV2PDA({ mint: mint.publicKey }),
+          true,
+          sonicTokenProgram,
+        ),
+        bondingCurve: this.bondingCurveV2PDA({ mint: mint.publicKey }),
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        splTokenProgram: sonicTokenProgram,
         systemProgram: SystemProgram.programId,
       })
       .transaction();
@@ -566,6 +706,198 @@ export class GoodrFunProgramBase {
   }
 
   /**
+   * Buys tokens from the bonding curve using SPL token (SONIC).
+   * @param user - The user to buy the tokens.
+   * @param mint - The mint to buy the tokens for.
+   * @param sonicMint - The SONIC mint address.
+   * @param amount - The amount of tokens to buy.
+   * @param maxCostSonic - The maximum cost in SONIC to buy the tokens.
+   * @param creatorWallet - The creator wallet to receive fees.
+   * @returns The transaction.
+   */
+  async buyWithSpl({
+    user,
+    mint,
+    sonicMint,
+    amount,
+    maxCostSonic,
+    creatorWallet,
+  }: {
+    user: PublicKey;
+    mint: PublicKey;
+    sonicMint: PublicKey;
+    amount: anchor.BN;
+    maxCostSonic: anchor.BN;
+    creatorWallet: PublicKey;
+  }): Promise<Transaction> {
+    const globalState = await this.getGlobalState();
+    const bondingCurveV2PDA = this.bondingCurveV2PDA({ mint });
+
+    // Determine the token program for SONIC mint
+    const sonicTokenProgram = await this.getTokenProgramForMint(sonicMint);
+
+    const associatedBondingCurve = getAssociatedTokenAddressSync(
+      mint,
+      bondingCurveV2PDA,
+      true,
+      TOKEN_2022_PROGRAM_ID,
+    );
+    const associatedBondingCurveSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      bondingCurveV2PDA,
+      true,
+      sonicTokenProgram,
+    );
+
+    const associatedUser = getAssociatedTokenAddressSync(
+      mint,
+      user,
+      false,
+      TOKEN_2022_PROGRAM_ID,
+    );
+    const associatedUserSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      user,
+      false,
+      sonicTokenProgram,
+    );
+    if (!globalState?.operatingWallet) {
+      throw new Error('Global state or operating wallet not found');
+    }
+    const operatingWalletSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      globalState.operatingWallet,
+      true, // allowOwnerOffCurve for operating wallet
+      sonicTokenProgram,
+    );
+    const creatorWalletSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      creatorWallet,
+      false,
+      sonicTokenProgram,
+    );
+
+    return await this.program.methods
+      .buyWithSpl(amount, maxCostSonic)
+      .accountsPartial({
+        user,
+        global: this.globalPDA,
+        sonicMint,
+        creatorWallet,
+        operatingWallet: globalState?.operatingWallet,
+        userSonicAccount: associatedUserSonic,
+        creatorSonicAccount: creatorWalletSonic,
+        operatingSonicAccount: operatingWalletSonic,
+        bondingCurveTokenAccount: associatedBondingCurve,
+        bondingCurveSonicAccount: associatedBondingCurveSonic,
+        bondingCurve: bondingCurveV2PDA,
+        userTokenAccount: associatedUser,
+        mint,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        sonicTokenProgram: sonicTokenProgram,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+  }
+
+  /**
+   * Sells tokens to the bonding curve for SPL token (SONIC).
+   * @param user - The user to sell the tokens.
+   * @param mint - The mint to sell the tokens for.
+   * @param sonicMint - The SONIC mint address.
+   * @param amount - The amount of tokens to sell.
+   * @param minSonicReceived - The minimum amount of SONIC to receive.
+   * @param creatorWallet - The creator wallet to receive fees.
+   * @returns The transaction.
+   */
+  async sellWithSpl({
+    user,
+    mint,
+    sonicMint,
+    amount,
+    minSonicReceived,
+    creatorWallet,
+  }: {
+    user: PublicKey;
+    mint: PublicKey;
+    sonicMint: PublicKey;
+    amount: anchor.BN;
+    minSonicReceived: anchor.BN;
+    creatorWallet: PublicKey;
+  }): Promise<Transaction> {
+    const globalState = await this.getGlobalState();
+    const bondingCurveV2PDA = this.bondingCurveV2PDA({ mint });
+
+    // Determine the token program for SONIC mint
+    const sonicTokenProgram = await this.getTokenProgramForMint(sonicMint);
+
+    const associatedBondingCurve = getAssociatedTokenAddressSync(
+      mint,
+      bondingCurveV2PDA,
+      true,
+      TOKEN_2022_PROGRAM_ID,
+    );
+    const associatedBondingCurveSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      bondingCurveV2PDA,
+      true,
+      sonicTokenProgram,
+    );
+
+    const associatedUser = getAssociatedTokenAddressSync(
+      mint,
+      user,
+      false,
+      TOKEN_2022_PROGRAM_ID,
+    );
+    const associatedUserSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      user,
+      false,
+      sonicTokenProgram,
+    );
+    if (!globalState?.operatingWallet) {
+      throw new Error('Global state or operating wallet not found');
+    }
+    const operatingWalletSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      globalState.operatingWallet,
+      true, // allowOwnerOffCurve for operating wallet
+      sonicTokenProgram,
+    );
+    const creatorWalletSonic = getAssociatedTokenAddressSync(
+      sonicMint,
+      creatorWallet,
+      false,
+      sonicTokenProgram,
+    );
+
+    return await this.program.methods
+      .sellWithSpl(amount, minSonicReceived)
+      .accountsPartial({
+        user,
+        global: this.globalPDA,
+        sonicMint,
+        mint,
+        operatingWallet: globalState?.operatingWallet,
+        creatorWallet,
+        userSonicAccount: associatedUserSonic,
+        creatorSonicAccount: creatorWalletSonic,
+        operatingSonicAccount: operatingWalletSonic,
+        bondingCurveTokenAccount: associatedBondingCurve,
+        bondingCurveSonicAccount: associatedBondingCurveSonic,
+        bondingCurve: bondingCurveV2PDA,
+        userTokenAccount: associatedUser,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        sonicTokenProgram: sonicTokenProgram,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+  }
+
+  /**
    * Withdraws tokens from the bonding curve.
    * @param user - The user to withdraw the tokens.
    * @param mint - The mint to withdraw the tokens for.
@@ -581,8 +913,9 @@ export class GoodrFunProgramBase {
     const globalState = await this.getGlobalState();
     const bondingCurveState = this.bondingCurvePDA({ mint });
 
-    const bondingCurve =
-      await this.accounts.bondingCurve.fetch(bondingCurveState);
+    const bondingCurve = await (
+      this.program as unknown as anchor.Program<GoodrFun>
+    ).account.bondingCurve.fetch(bondingCurveState);
 
     const associatedUser = getAssociatedTokenAddressSync(
       mint,
@@ -607,7 +940,7 @@ export class GoodrFunProgramBase {
         mint: mint,
         operatingWallet: globalState?.operatingWallet,
         associatedUser: associatedUser,
-        creatorWallet: bondingCurve?.creatorWallet,
+        creatorWallet: bondingCurve?.creator,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       })
@@ -738,5 +1071,187 @@ export class GoodrFunProgramBase {
 
     const progressPercentage = (1 - progress) * 100;
     return progressPercentage;
+  }
+
+  async getPriceAndMarketcapV2(mint: PublicKey) {
+    const bondingCurveV2State = await this.getBondingCurveV2State({ mint });
+
+    const virtualBaseReserves =
+      bondingCurveV2State?.virtualBaseReserves.toNumber();
+    const virtualTokenReserves =
+      bondingCurveV2State?.virtualTokenReserves.toNumber();
+    const tokenTotalSupply = bondingCurveV2State?.tokenTotalSupply.toNumber();
+    if (!virtualBaseReserves || !virtualTokenReserves || !tokenTotalSupply) {
+      throw new Error('Bonding curve V2 state not found');
+    }
+    const constant = virtualBaseReserves * virtualTokenReserves;
+    const deltaBase =
+      virtualBaseReserves - constant / (virtualTokenReserves + 1);
+    return {
+      price: deltaBase,
+      marketcap: deltaBase * tokenTotalSupply,
+    };
+  }
+
+  async getBondingCurveProgressV2(mint: PublicKey) {
+    const bondingCurveV2State = await this.getBondingCurveV2State({ mint });
+    if (!bondingCurveV2State) {
+      throw new Error('Bonding curve V2 state not found');
+    }
+    const globalState = await this.getGlobalState();
+    if (!globalState) {
+      throw new Error('Global state not found');
+    }
+
+    const progress =
+      bondingCurveV2State.realTokenReserves.toNumber() /
+      globalState.sonicInitialRealTokenReserves.toNumber();
+
+    const progressPercentage = (1 - progress) * 100;
+    return progressPercentage;
+  }
+
+  /**
+   * Calculates the amount of tokens to buy from the bonding curve using SPL token (SONIC).
+   * @param mint - The mint to buy the tokens for.
+   * @param sonicMint - The SONIC mint address.
+   * @param amountSonic - The amount of SONIC to buy the tokens with.
+   * @param slippage - The slippage percentage.
+   * @returns The amount of tokens to buy and the maximum cost in SONIC.
+   */
+  async calculateBuyTokenAmountWithSpl({
+    mint,
+    sonicMint: _sonicMint,
+    amountSonic,
+    slippage,
+  }: {
+    mint: PublicKey;
+    sonicMint: PublicKey;
+    amountSonic: anchor.BN;
+    slippage: number;
+  }): Promise<{
+    amountToken: anchor.BN;
+    maxCostSonic: anchor.BN;
+  }> {
+    const bondingCurveV2State = await this.getBondingCurveV2State({ mint });
+    if (bondingCurveV2State) {
+      const virtualSonicReserves = bondingCurveV2State.virtualBaseReserves;
+      const virtualTokenReserves = bondingCurveV2State.virtualTokenReserves;
+      const constant = virtualSonicReserves.mul(virtualTokenReserves);
+      let deltaToken = virtualTokenReserves.sub(
+        constant.div(virtualSonicReserves.add(amountSonic)),
+      );
+      if (deltaToken.gt(bondingCurveV2State.realTokenReserves)) {
+        deltaToken = bondingCurveV2State.realTokenReserves;
+      }
+      return {
+        amountToken: deltaToken,
+        maxCostSonic: amountSonic
+          .mul(new anchor.BN(slippage + 100))
+          .div(new anchor.BN(100)),
+      };
+    } else {
+      const globalState = await this.getGlobalState();
+      const virtualSonicReserves = globalState?.sonicInitialVirtualBaseReserves;
+      const virtualTokenReserves =
+        globalState?.sonicInitialVirtualTokenReserves;
+      if (!virtualSonicReserves || !virtualTokenReserves) {
+        throw new Error('SONIC virtual reserves not found in global state');
+      }
+      const constant = virtualSonicReserves.mul(virtualTokenReserves);
+      const deltaToken = virtualTokenReserves.sub(
+        constant.div(virtualSonicReserves.add(amountSonic)),
+      );
+      return {
+        amountToken: deltaToken,
+        maxCostSonic: amountSonic
+          .mul(new anchor.BN(slippage + 100))
+          .div(new anchor.BN(100)),
+      };
+    }
+  }
+
+  /**
+   * Calculates the amount of tokens to sell to the bonding curve for SPL token (SONIC).
+   * @param mint - The mint to sell the tokens for.
+   * @param sonicMint - The SONIC mint address.
+   * @param amountToken - The amount of tokens to sell.
+   * @param slippage - The slippage percentage.
+   * @returns The amount of tokens to sell and the minimum amount of SONIC to receive.
+   */
+  async calculateSellTokenAmountWithSpl({
+    mint,
+    sonicMint: _sonicMint,
+    amountToken,
+    slippage,
+  }: {
+    mint: PublicKey;
+    sonicMint: PublicKey;
+    amountToken: anchor.BN;
+    slippage: number;
+  }): Promise<{
+    amountToken: anchor.BN;
+    minSonicReceived: anchor.BN;
+  }> {
+    const bondingCurveV2State = await this.getBondingCurveV2State({ mint });
+    if (bondingCurveV2State) {
+      const virtualSonicReserves = bondingCurveV2State.virtualBaseReserves;
+      const virtualTokenReserves = bondingCurveV2State.virtualTokenReserves;
+      const realSonicReserves = bondingCurveV2State.realBaseReserves;
+
+      // Get global state for fees
+      const globalState = await this.getGlobalState();
+      if (!globalState) {
+        throw new Error('Global state not found');
+      }
+
+      // Use constant product formula (x*y=k) - same as buy operations and updated contract
+      const constant = virtualSonicReserves.mul(virtualTokenReserves);
+      const newVirtualTokenReserves = virtualTokenReserves.add(amountToken);
+      const newVirtualSonicReserves = constant.div(newVirtualTokenReserves);
+      const sonicReceived = virtualSonicReserves.sub(newVirtualSonicReserves);
+
+      // Cap by real reserves (same as contract)
+      const cappedSonicReceived = sonicReceived.gt(realSonicReserves)
+        ? realSonicReserves
+        : sonicReceived;
+
+      // Subtract fees (operating + creator)
+      const operatingFee = cappedSonicReceived
+        .mul(globalState.operatingFeeBasisPoints)
+        .div(new anchor.BN(10000));
+      const creatorFee = cappedSonicReceived
+        .mul(globalState.creatorFeeBasisPoints)
+        .div(new anchor.BN(10000));
+      const sonicAfterFees = cappedSonicReceived
+        .sub(operatingFee)
+        .sub(creatorFee);
+
+      // Apply slippage to the after-fee amount
+      return {
+        amountToken: amountToken,
+        minSonicReceived: sonicAfterFees
+          .mul(new anchor.BN(100 - slippage))
+          .div(new anchor.BN(100)),
+      };
+    } else {
+      const globalState = await this.getGlobalState();
+      const virtualSonicReserves = globalState?.sonicInitialVirtualBaseReserves;
+      const virtualTokenReserves =
+        globalState?.sonicInitialVirtualTokenReserves;
+      if (!virtualSonicReserves || !virtualTokenReserves) {
+        throw new Error('SONIC virtual reserves not found in global state');
+      }
+      const constant = virtualSonicReserves.mul(virtualTokenReserves);
+      const deltaSonic = virtualSonicReserves.sub(
+        constant.div(virtualTokenReserves.add(amountToken)),
+      );
+      return {
+        amountToken: amountToken,
+        minSonicReceived: deltaSonic
+          .mul(new anchor.BN(100 - slippage))
+          .div(new anchor.BN(100)),
+      };
+    }
   }
 }

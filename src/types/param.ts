@@ -1,5 +1,6 @@
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { MemeDonationDestinationName } from '../base/meme-donation-destination';
+import { BigNumber } from 'bignumber.js';
 
 export type DonationAmount =
   | 50_000_000
@@ -32,4 +33,28 @@ export type SellParams = {
   mint: PublicKey;
   slippageBasisPoints: number;
   tokenAmount: BigNumber;
+};
+
+// SONIC-specific parameter types
+export type CreateAndBuyWithSonicParams = {
+  mint: Keypair;
+  metadata: TokenCreationMetadata;
+  buySonicAmount: BigNumber;
+  baseCurrencyMint: PublicKey;
+  meme: MemeDonationDestinationName;
+  slippageBasisPoints: number;
+};
+
+export type BuyWithSonicParams = {
+  mint: PublicKey;
+  slippageBasisPoints: number;
+  sonicAmount: BigNumber;
+  baseCurrencyMint: PublicKey;
+};
+
+export type SellWithSonicParams = {
+  mint: PublicKey;
+  slippageBasisPoints: number;
+  tokenAmount: BigNumber;
+  baseCurrencyMint: PublicKey;
 };

@@ -117,13 +117,109 @@ const main = async () => {
 main().catch(console.error);
 ```
 
+## SONIC Integration
+
+The SDK supports SONIC token operations with SPL-22 tokens as base currency:
+
+```typescript
+import { Keypair, PublicKey } from '@solana/web3.js';
+import {
+  GoodrFunSDK,
+  TokenMetadata,
+  MemeDonationDestinationName,
+  getMemeDonationDestinationFromName,
+  ChainType,
+} from 'goodrdotfun-sdk';
+import { BigNumber } from 'bignumber.js';
+
+const main = async () => {
+  // Initialize SDK for SONIC
+  const rpcEndpoint = 'https://api.testnet.sonic.game';
+  const sdk = new GoodrFunSDK(ChainType.SONIC, rpcEndpoint);
+
+  const wallet = Keypair.generate(); // Your wallet keypair
+  const mint = Keypair.generate();
+  
+  // SONIC token mint address (SPL-22)
+  const sonicMint = new PublicKey('SONIC_TOKEN_MINT_ADDRESS');
+
+  const donation = getMemeDonationDestinationFromName(
+    MemeDonationDestinationName.FarmMeme,
+  );
+
+  // Create token with SONIC as base currency
+  const result = await sdk.createAndBuyWithSonic(wallet, {
+    mint: mint,
+    baseCurrencyMint: sonicMint,
+    buySonicAmount: new BigNumber(1.0).multipliedBy(10 ** 9), // 1 SONIC (9 decimals)
+    slippageBasisPoints: 500,
+    meme: donation.name,
+    metadata: {
+      name: 'SONIC MEME',
+      symbol: 'SMEME',
+      metadataUri: 'https://your-metadata-uri.com/metadata.json',
+    },
+  });
+
+  console.log('SONIC token created:', {
+    signature: result.signature,
+    tokenAddress: mint.publicKey.toBase58(),
+  });
+
+  // Buy more tokens with SONIC
+  const buyResult = await sdk.buyWithSonic(wallet, {
+    mint: mint.publicKey,
+    baseCurrencyMint: sonicMint,
+    sonicAmount: new BigNumber(0.5).multipliedBy(10 ** 9), // 0.5 SONIC
+    slippageBasisPoints: 500,
+  });
+
+  console.log('Additional tokens bought with SONIC:', {
+    signature: buyResult.signature,
+  });
+
+  // Sell tokens for SONIC
+  const sellResult = await sdk.sellWithSonic(wallet, {
+    mint: mint.publicKey,
+    baseCurrencyMint: sonicMint,
+    tokenAmount: new BigNumber(100).multipliedBy(10 ** 6), // 100 tokens
+    slippageBasisPoints: 500,
+  });
+
+  console.log('Tokens sold for SONIC:', {
+    signature: sellResult.signature,
+  });
+
+  // Calculate token amounts with SONIC
+  const buyCalculation = await sdk.calculateBuyTokenAmountWithSonic({
+    mint: mint.publicKey,
+    baseCurrencyMint: sonicMint,
+    amountSonic: new BigNumber(1.0), // 1 SONIC
+  });
+
+  console.log('Tokens you can buy with 1 SONIC:', buyCalculation.amountToken.toString());
+
+  const sellCalculation = await sdk.calculateSellTokenAmountWithSonic({
+    mint: mint.publicKey,
+    baseCurrencyMint: sonicMint,
+    amountToken: new BigNumber(100), // 100 tokens
+  });
+
+  console.log('SONIC you can get for 100 tokens:', sellCalculation.amountSonic.toString());
+};
+
+main().catch(console.error);
+```
+
 ## Features
 
-- Create and buy tokens in a single transaction
-- Buy and sell tokens with slippage protection
+- Create and buy tokens in a single transaction (SOL and SONIC)
+- Buy and sell tokens with slippage protection (SOL and SONIC)
+- Support for SPL and SPL-22 (Token-2022) tokens
 - Get token balances and price data
 - Monitor token state and bonding curve progress
 - Built-in bonding curve calculations
+- Dynamic token program detection
 
 ## API Reference
 
@@ -189,6 +285,44 @@ constructor(rpcEndpoint: string)
 - `calculateBuyTokenAmount(params: { mint: PublicKey, amountSol: BigNumber }): Promise<{ amountToken: BigNumber }>`
   - Calculates the amount of tokens that can be bought with a given SOL amount
   - Useful for price impact estimation before trading
+
+#### SONIC-specific Methods
+
+- `createAndBuyWithSonic(creator: Keypair, params: CreateAndBuyWithSonicParams): Promise<TransactionResult>`
+
+  - Creates a new token using SONIC as base currency and buys initial tokens
+  - Parameters:
+    - `mint`: Token mint keypair
+    - `baseCurrencyMint`: SONIC token mint (SPL-22)
+    - `buySonicAmount`: Initial buy amount in SONIC
+    - `slippageBasisPoints`: Slippage tolerance
+    - `metadata`: Token metadata (name, symbol, URI)
+
+- `buyWithSonic(creator: Keypair, params: BuyWithSonicParams): Promise<TransactionResult>`
+
+  - Buys tokens with specified SONIC amount and slippage protection
+  - Parameters:
+    - `mint`: Token mint public key
+    - `baseCurrencyMint`: SONIC token mint (SPL-22)
+    - `sonicAmount`: Amount of SONIC to spend
+    - `slippageBasisPoints`: Slippage tolerance
+
+- `sellWithSonic(creator: Keypair, params: SellWithSonicParams): Promise<TransactionResult>`
+
+  - Sells specified amount of tokens for SONIC with slippage protection
+  - Parameters:
+    - `mint`: Token mint public key
+    - `baseCurrencyMint`: SONIC token mint (SPL-22)
+    - `tokenAmount`: Amount of tokens to sell
+    - `slippageBasisPoints`: Slippage tolerance
+
+- `calculateBuyTokenAmountWithSonic(params: { mint: PublicKey, baseCurrencyMint: PublicKey, amountSonic: BigNumber }): Promise<{ amountToken: BigNumber }>`
+  - Calculates the amount of tokens that can be bought with a given SONIC amount
+  - Useful for price impact estimation before trading with SONIC
+
+- `calculateSellTokenAmountWithSonic(params: { mint: PublicKey, baseCurrencyMint: PublicKey, amountToken: BigNumber }): Promise<{ amountSonic: BigNumber }>`
+  - Calculates the amount of SONIC that can be received for a given token amount
+  - Useful for price impact estimation before selling for SONIC
 
 #### Event Listeners
 
