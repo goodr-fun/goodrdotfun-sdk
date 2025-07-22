@@ -2171,6 +2171,12 @@ export type GoodrFun = {
             name: 'user';
             type: 'pubkey';
           },
+          {
+            name: 'baseCurrencyMint';
+            type: {
+              option: 'pubkey';
+            };
+          },
         ];
       };
     },

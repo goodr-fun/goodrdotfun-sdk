@@ -1480,6 +1480,12 @@
           {
             "name": "user",
             "type": "pubkey"
+          },
+          {
+            "name": "base_currency_mint",
+            "type": {
+              "option": "pubkey"
+            }
           }
         ]
       }
