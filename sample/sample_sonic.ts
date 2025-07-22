@@ -109,6 +109,7 @@ const main = async () => {
   console.log(
     `🪙 Total supply: ${tokenStateAfterCreate.totalSupply.toFixed(0)} tokens`,
   );
+  console.log(`💱 Currency type: ${tokenStateAfterCreate.currencyType}`);
 
   // Step 2: Additional Buy with SONIC tokens
   console.log('\n--- Step 2: Additional Buy ---');
@@ -136,6 +137,7 @@ const main = async () => {
   console.log(
     `🚀 New bonding curve progress: ${tokenStateAfterBuy.bondingCurveProgress.toFixed(4)}%`,
   );
+  console.log(`💱 Currency type: ${tokenStateAfterBuy.currencyType}`);
 
   // Step 3: Confirm total SONIC spent
   console.log('\n--- Step 3: Confirm SONIC Spent ---');
@@ -193,6 +195,7 @@ const main = async () => {
   console.log(
     `🚀 Final bonding curve progress: ${tokenStateAfterSell.bondingCurveProgress.toFixed(4)}%`,
   );
+  console.log(`💱 Currency type: ${tokenStateAfterSell.currencyType}`);
 
   // Step 5: Confirm received SONIC is smaller than spent amount
   console.log('\n--- Step 5: Confirm Loss ---');

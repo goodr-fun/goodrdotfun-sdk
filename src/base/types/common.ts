@@ -157,6 +157,7 @@ export interface TokenState {
   priceData: PriceData;
   bondingCurveProgress: number;
   totalSupply: BigNumber;
+  currencyType: 'SOL' | 'SONIC';
 }
 
 export interface PriorityFee {

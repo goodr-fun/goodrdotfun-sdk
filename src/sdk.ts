@@ -848,6 +848,7 @@ export class GoodrFunSDK {
       priceData,
       bondingCurveProgress,
       totalSupply: totalSupplyBN,
+      currencyType: bondingCurveState ? 'SONIC' : 'SOL',
     };
   }
 }
