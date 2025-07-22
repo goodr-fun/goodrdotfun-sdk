@@ -10,6 +10,7 @@ export type CreateEvent = {
   bondingCurve: PublicKey;
   donationDestination: PublicKey;
   user: PublicKey;
+  baseCurrencyMint: PublicKey | null;
 };
 
 export type TradeEvent = {
@@ -23,6 +24,7 @@ export type TradeEvent = {
   virtualTokenReserves: BigNumber;
   realTokenReserves: BigNumber;
   realSolReserves: BigNumber;
+  baseCurrencyMint: PublicKey | null;
 };
 
 export type CompleteEvent = {

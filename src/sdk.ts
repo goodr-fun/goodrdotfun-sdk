@@ -120,6 +120,7 @@ export class GoodrFunSDK {
           ),
           realTokenReserves: new BigNumber(event.realTokenReserves.toString()),
           realSolReserves: new BigNumber(event.realSolReserves.toString()),
+          baseCurrencyMint: event.baseCurrencyMint,
         },
         slot,
         signature,
