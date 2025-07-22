@@ -1,6 +1,7 @@
-import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import {
   BondingCurveState,
+  BondingCurveV2State,
   GlobalState,
   GoodrFunProgramBase,
 } from './base-program';
@@ -42,12 +43,40 @@ export class GoodrFunProgram extends GoodrFunProgramBase {
     const constant = virtualSolReserves * virtualTokenReserves;
     const deltaSol = virtualSolReserves - constant / (virtualTokenReserves + 1);
 
-    const lamportPerSolBN = new BigNumber(LAMPORTS_PER_SOL);
     const decimalBN = new BigNumber(10).pow(this._decimals);
 
-    const priceBN = new BigNumber(deltaSol).div(lamportPerSolBN);
+    // Apply the same scaling as getCurrentState for V1 (SOL)
+    const priceBN = new BigNumber(deltaSol).div(new BigNumber(10).pow(3));
     const marketCapBN = new BigNumber(deltaSol * tokenTotalSupply).div(
-      lamportPerSolBN,
+      new BigNumber(10).pow(9),
+    );
+    const totalSupplyBN = new BigNumber(tokenTotalSupply).div(decimalBN);
+
+    return {
+      price: priceBN,
+      marketCap: marketCapBN,
+      totalSupply: totalSupplyBN,
+    };
+  }
+
+  async getPriceDataFromStateV2(
+    bondingCurveV2State: BondingCurveV2State,
+  ): Promise<PriceData> {
+    const virtualBaseReserves =
+      bondingCurveV2State?.virtualBaseReserves.toNumber();
+    const virtualTokenReserves =
+      bondingCurveV2State?.virtualTokenReserves.toNumber();
+    const tokenTotalSupply = bondingCurveV2State?.tokenTotalSupply.toNumber();
+    const constant = virtualBaseReserves * virtualTokenReserves;
+    const deltaBase =
+      virtualBaseReserves - constant / (virtualTokenReserves + 1);
+
+    const decimalBN = new BigNumber(10).pow(this._decimals);
+
+    // Apply the same scaling as getCurrentState for V2 (SONIC)
+    const priceBN = new BigNumber(deltaBase).div(new BigNumber(10).pow(3));
+    const marketCapBN = new BigNumber(deltaBase * tokenTotalSupply).div(
+      new BigNumber(10).pow(9),
     );
     const totalSupplyBN = new BigNumber(tokenTotalSupply).div(decimalBN);
     return {

@@ -98,10 +98,10 @@ const main = async () => {
   // Check token state after creation
   const tokenStateAfterCreate = await sdk.getCurrentState(mint.publicKey);
   console.log(
-    `📈 Price: ${tokenStateAfterCreate.priceData.price.toFixed(8)} SONIC per token`,
+    `📈 Price: ${tokenStateAfterCreate.priceData.price.toFixed(12)} SONIC per token`,
   );
   console.log(
-    `💎 Market Cap: ${tokenStateAfterCreate.priceData.marketCap.dividedBy(10 ** 9).toFixed(4)} SONIC`,
+    `💎 Market Cap: ${tokenStateAfterCreate.priceData.marketCap.toFixed(2)} SONIC`,
   );
   console.log(
     `🚀 Bonding curve progress: ${tokenStateAfterCreate.bondingCurveProgress.toFixed(4)}%`,
@@ -110,6 +110,45 @@ const main = async () => {
     `🪙 Total supply: ${tokenStateAfterCreate.totalSupply.toFixed(0)} tokens`,
   );
   console.log(`💱 Currency type: ${tokenStateAfterCreate.currencyType}`);
+
+  // Test getPriceAndMarketcapData method consistency
+  console.log('\n--- Testing getPriceAndMarketcapData Method ---');
+  const priceDataFromMethod = await sdk.getPriceAndMarketcapData(
+    mint.publicKey,
+  );
+  console.log(
+    `📈 Method Price: ${priceDataFromMethod.price.toFixed(12)} SONIC per token`,
+  );
+  console.log(
+    `💎 Method Market Cap: ${priceDataFromMethod.marketCap.toFixed(2)} SONIC`,
+  );
+  console.log(
+    `🪙 Method Total Supply: ${priceDataFromMethod.totalSupply.toFixed(0)} tokens`,
+  );
+
+  // Compare values
+  const priceMatch = tokenStateAfterCreate.priceData.price.isEqualTo(
+    priceDataFromMethod.price,
+  );
+  const marketCapMatch = tokenStateAfterCreate.priceData.marketCap.isEqualTo(
+    priceDataFromMethod.marketCap,
+  );
+  const totalSupplyMatch =
+    tokenStateAfterCreate.priceData.totalSupply.isEqualTo(
+      priceDataFromMethod.totalSupply,
+    );
+
+  console.log(`🔍 Price match: ${priceMatch ? '✅' : '❌'}`);
+  console.log(`🔍 Market cap match: ${marketCapMatch ? '✅' : '❌'}`);
+  console.log(`🔍 Total supply match: ${totalSupplyMatch ? '✅' : '❌'}`);
+
+  if (priceMatch && marketCapMatch && totalSupplyMatch) {
+    console.log(
+      '✅ All values match between getCurrentState and getPriceAndMarketcapData',
+    );
+  } else {
+    console.log('❌ Values differ between methods - needs investigation');
+  }
 
   // Step 2: Additional Buy with SONIC tokens
   console.log('\n--- Step 2: Additional Buy ---');
@@ -129,10 +168,10 @@ const main = async () => {
   // Check token state after additional buy
   const tokenStateAfterBuy = await sdk.getCurrentState(mint.publicKey);
   console.log(
-    `📈 New price: ${tokenStateAfterBuy.priceData.price.toFixed(8)} SONIC per token`,
+    `📈 New price: ${tokenStateAfterBuy.priceData.price.toFixed(12)} SONIC per token`,
   );
   console.log(
-    `💎 New market cap: ${tokenStateAfterBuy.priceData.marketCap.dividedBy(10 ** 9).toFixed(4)} SONIC`,
+    `💎 New market cap: ${tokenStateAfterBuy.priceData.marketCap.toFixed(2)} SONIC`,
   );
   console.log(
     `🚀 New bonding curve progress: ${tokenStateAfterBuy.bondingCurveProgress.toFixed(4)}%`,
@@ -187,10 +226,10 @@ const main = async () => {
   // Check final token state after selling all tokens
   const tokenStateAfterSell = await sdk.getCurrentState(mint.publicKey);
   console.log(
-    `📈 Final price: ${tokenStateAfterSell.priceData.price.toFixed(8)} SONIC per token`,
+    `📈 Final price: ${tokenStateAfterSell.priceData.price.toFixed(12)} SONIC per token`,
   );
   console.log(
-    `💎 Final market cap: ${tokenStateAfterSell.priceData.marketCap.dividedBy(10 ** 9).toFixed(4)} SONIC`,
+    `💎 Final market cap: ${tokenStateAfterSell.priceData.marketCap.toFixed(2)} SONIC`,
   );
   console.log(
     `🚀 Final bonding curve progress: ${tokenStateAfterSell.bondingCurveProgress.toFixed(4)}%`,

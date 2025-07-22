@@ -92,7 +92,7 @@ const main = async () => {
   // Check token state after creation
   const tokenStateAfterCreate = await sdk.getCurrentState(mint.publicKey);
   console.log(
-    `📈 Price: ${tokenStateAfterCreate.priceData.price.toFixed(8)} SOL per token`,
+    `📈 Price: ${tokenStateAfterCreate.priceData.price.toFixed(12)} SOL per token`,
   );
   console.log(
     `💎 Market Cap: ${tokenStateAfterCreate.priceData.marketCap.toFixed(4)} SOL`,
@@ -104,6 +104,45 @@ const main = async () => {
     `🪙 Total supply: ${tokenStateAfterCreate.totalSupply.toFixed(0)} tokens`,
   );
   console.log(`💱 Currency type: ${tokenStateAfterCreate.currencyType}`);
+
+  // Test getPriceAndMarketcapData method consistency
+  console.log('\n--- Testing getPriceAndMarketcapData Method ---');
+  const priceDataFromMethod = await sdk.getPriceAndMarketcapData(
+    mint.publicKey,
+  );
+  console.log(
+    `📈 Method Price: ${priceDataFromMethod.price.toFixed(12)} SOL per token`,
+  );
+  console.log(
+    `💎 Method Market Cap: ${priceDataFromMethod.marketCap.toFixed(4)} SOL`,
+  );
+  console.log(
+    `🪙 Method Total Supply: ${priceDataFromMethod.totalSupply.toFixed(0)} tokens`,
+  );
+
+  // Compare values
+  const priceMatch = tokenStateAfterCreate.priceData.price.isEqualTo(
+    priceDataFromMethod.price,
+  );
+  const marketCapMatch = tokenStateAfterCreate.priceData.marketCap.isEqualTo(
+    priceDataFromMethod.marketCap,
+  );
+  const totalSupplyMatch =
+    tokenStateAfterCreate.priceData.totalSupply.isEqualTo(
+      priceDataFromMethod.totalSupply,
+    );
+
+  console.log(`🔍 Price match: ${priceMatch ? '✅' : '❌'}`);
+  console.log(`🔍 Market cap match: ${marketCapMatch ? '✅' : '❌'}`);
+  console.log(`🔍 Total supply match: ${totalSupplyMatch ? '✅' : '❌'}`);
+
+  if (priceMatch && marketCapMatch && totalSupplyMatch) {
+    console.log(
+      '✅ All values match between getCurrentState and getPriceAndMarketcapData',
+    );
+  } else {
+    console.log('❌ Values differ between methods - needs investigation');
+  }
 
   // Step 2: Additional Buy with SOL
   console.log('\n--- Step 2: Additional Buy ---');
@@ -122,7 +161,7 @@ const main = async () => {
   // Check token state after additional buy
   const tokenStateAfterBuy = await sdk.getCurrentState(mint.publicKey);
   console.log(
-    `📈 New price: ${tokenStateAfterBuy.priceData.price.toFixed(8)} SOL per token`,
+    `📈 New price: ${tokenStateAfterBuy.priceData.price.toFixed(12)} SOL per token`,
   );
   console.log(
     `💎 New market cap: ${tokenStateAfterBuy.priceData.marketCap.toFixed(4)} SOL`,
@@ -194,7 +233,7 @@ const main = async () => {
     // Check final token state after selling tokens
     const tokenStateAfterSell = await sdk.getCurrentState(mint.publicKey);
     console.log(
-      `📈 Final price: ${tokenStateAfterSell.priceData.price.toFixed(8)} SOL per token`,
+      `📈 Final price: ${tokenStateAfterSell.priceData.price.toFixed(12)} SOL per token`,
     );
     console.log(
       `💎 Final market cap: ${tokenStateAfterSell.priceData.marketCap.toFixed(4)} SOL`,

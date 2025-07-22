@@ -789,9 +789,23 @@ export class GoodrFunSDK {
    * @returns Price data including current price and market cap
    */
   async getPriceAndMarketcapData(mint: PublicKey): Promise<PriceData> {
-    const bondingCurveState = await this.program.getBondingCurveState({ mint });
-    if (!bondingCurveState) throw new Error('Bonding curve state is not found');
-    return this.program.getPriceDataFromState(bondingCurveState);
+    // Try V2 (SONIC) bonding curve first, then V1 (SOL)
+    const bondingCurveV2State = await this.program.getBondingCurveV2State({
+      mint,
+    });
+
+    if (bondingCurveV2State) {
+      // SONIC token - use V2 method
+      return this.program.getPriceDataFromStateV2(bondingCurveV2State);
+    } else {
+      // Try V1 (SOL) bonding curve
+      const bondingCurveState = await this.program.getBondingCurveState({
+        mint,
+      });
+      if (!bondingCurveState)
+        throw new Error('Bonding curve state is not found');
+      return this.program.getPriceDataFromState(bondingCurveState);
+    }
   }
 
   /**
@@ -818,9 +832,14 @@ export class GoodrFunSDK {
       totalSupplyBN = new BigNumber(
         bondingCurveState.tokenTotalSupply.toString(),
       ).div(new BigNumber(10).pow(this.program.decimals));
+      // For SONIC (V2), price includes 10^3 scaling factor from contract, marketcap needs conversion by SONIC decimals
       priceData = {
-        price: new BigNumber(priceAndMarketcap.price),
-        marketCap: new BigNumber(priceAndMarketcap.marketcap),
+        price: new BigNumber(priceAndMarketcap.price).div(
+          new BigNumber(10).pow(3),
+        ),
+        marketCap: new BigNumber(priceAndMarketcap.marketcap).div(
+          new BigNumber(10).pow(9),
+        ),
         totalSupply: totalSupplyBN,
       };
     } else {
@@ -837,9 +856,14 @@ export class GoodrFunSDK {
       totalSupplyBN = new BigNumber(
         bondingCurveV1State.tokenTotalSupply.toString(),
       ).div(new BigNumber(10).pow(this.program.decimals));
+      // For SOL (V1), price includes 10^3 scaling factor from contract, marketcap needs conversion from lamports
       priceData = {
-        price: new BigNumber(priceAndMarketcap.price),
-        marketCap: new BigNumber(priceAndMarketcap.marketcap),
+        price: new BigNumber(priceAndMarketcap.price).div(
+          new BigNumber(10).pow(3),
+        ),
+        marketCap: new BigNumber(priceAndMarketcap.marketcap).div(
+          new BigNumber(10).pow(9),
+        ),
         totalSupply: totalSupplyBN,
       };
     }
