@@ -948,6 +948,75 @@ export class GoodrFunProgramBase {
   }
 
   /**
+   * Withdraws tokens and SONIC from a completed bonding curve V2.
+   * @param user - The user (authority) to withdraw the tokens.
+   * @param mint - The token mint to withdraw.
+   * @param sonicMint - The SONIC mint address.
+   * @returns The transaction.
+   */
+  async withdrawSpl({
+    user,
+    mint,
+    sonicMint,
+  }: {
+    user: PublicKey;
+    mint: PublicKey;
+    sonicMint: PublicKey;
+  }): Promise<Transaction> {
+    const bondingCurveV2State = this.bondingCurveV2PDA({ mint });
+
+    // Determine the token program for SONIC mint
+    const sonicTokenProgram = await this.getTokenProgramForMint(sonicMint);
+
+    // Bonding curve token accounts
+    const bondingCurveTokenAccount = getAssociatedTokenAddressSync(
+      mint,
+      bondingCurveV2State,
+      true,
+      TOKEN_2022_PROGRAM_ID,
+    );
+    const bondingCurveSonicAccount = getAssociatedTokenAddressSync(
+      sonicMint,
+      bondingCurveV2State,
+      true,
+      sonicTokenProgram,
+    );
+
+    // Authority (user) token accounts
+    const authorityTokenAccount = getAssociatedTokenAddressSync(
+      mint,
+      user,
+      false,
+      TOKEN_2022_PROGRAM_ID,
+    );
+    const authoritySonicAccount = getAssociatedTokenAddressSync(
+      sonicMint,
+      user,
+      false,
+      sonicTokenProgram,
+    );
+
+    return await this.program.methods
+      .withdrawSpl()
+      .accountsPartial({
+        global: this.globalPDA,
+        mint: mint,
+        sonicMint: sonicMint,
+        bondingCurveTokenAccount: bondingCurveTokenAccount,
+        bondingCurveSonicAccount: bondingCurveSonicAccount,
+        authorityTokenAccount: authorityTokenAccount,
+        authoritySonicAccount: authoritySonicAccount,
+        bondingCurve: bondingCurveV2State,
+        user: user,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      })
+      .transaction();
+  }
+
+  /**
    * Calculates the amount of tokens to buy from the bonding curve.
    * @param mint - The mint to buy the tokens for.
    * @param amountSol - The amount of SOL to buy the tokens with.

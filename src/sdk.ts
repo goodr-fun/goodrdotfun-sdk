@@ -634,6 +634,35 @@ export class GoodrFunSDK {
   }
 
   /**
+   * Withdraws tokens and SONIC from a completed bonding curve V2
+   * @param authority - The authority (signer) to withdraw the tokens
+   * @param mint - The token mint address to withdraw
+   * @param sonicMint - The SONIC token mint address
+   * @returns Transaction hash of the withdrawal
+   */
+  async withdrawSpl({
+    authority,
+    mint,
+    sonicMint,
+  }: {
+    authority: Signer;
+    mint: PublicKey;
+    sonicMint: PublicKey;
+  }) {
+    const withdrawTx = await this.program.withdrawSpl({
+      user: authority.publicKey,
+      mint,
+      sonicMint,
+    });
+    const txHash = await sendAndConfirmTransaction(
+      this.program.connection,
+      withdrawTx,
+      [authority],
+    );
+    return txHash;
+  }
+
+  /**
    * Gets the token account balance for a given mint and authority
    * @param mint - The token mint address
    * @param authority - The authority's public key
