@@ -1,4 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
+import { CurrencyType } from './common';
 
 // Add your types here
 
@@ -10,7 +11,7 @@ export type CreateEvent = {
   bondingCurve: PublicKey;
   donationDestination: PublicKey;
   user: PublicKey;
-  baseCurrencyMint: PublicKey | null;
+  currency: CurrencyType;
 };
 
 export type TradeEvent = {
@@ -24,7 +25,7 @@ export type TradeEvent = {
   virtualTokenReserves: BigNumber;
   realTokenReserves: BigNumber;
   realSolReserves: BigNumber;
-  baseCurrencyMint: PublicKey | null;
+  currency: CurrencyType;
 };
 
 export type CompleteEvent = {

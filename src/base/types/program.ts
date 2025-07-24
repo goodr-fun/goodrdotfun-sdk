@@ -2172,10 +2172,8 @@ export type GoodrFun = {
             type: 'pubkey';
           },
           {
-            name: 'baseCurrencyMint';
-            type: {
-              option: 'pubkey';
-            };
+            name: 'currency';
+            type: 'string';
           },
         ];
       };
@@ -2340,10 +2338,8 @@ export type GoodrFun = {
             type: 'u64';
           },
           {
-            name: 'baseCurrencyMint';
-            type: {
-              option: 'pubkey';
-            };
+            name: 'currency';
+            type: 'string';
           },
         ];
       };

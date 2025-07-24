@@ -6,3 +6,8 @@ export enum ChainType {
   SONIC = 'sonic',
   SOLANA = 'solana',
 }
+
+export enum CurrencyType {
+  SONIC = 'SONIC',
+  SOL = 'SOL',
+}

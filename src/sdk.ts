@@ -25,6 +25,7 @@ import {
   BondingCurveAccount,
   ChainType,
   getMemeDonationDestinationFromName,
+  CurrencyType,
 } from './types';
 import { BN } from 'bn.js';
 import { DEFAULT_SLIPPAGE_BASIS_POINTS, TOKEN_DECIMALS } from './base/constant';
@@ -92,7 +93,16 @@ export class GoodrFunSDK {
   addOnCreateEvent(
     callback: (event: CreateEvent, slot: number, signature: string) => void,
   ): number {
-    return this.program.onCreateEvent(callback);
+    return this.program.onCreateEvent((event, slot, signature) => {
+      callback(
+        {
+          ...event,
+          currency: event.currency as CurrencyType,
+        },
+        slot,
+        signature,
+      );
+    });
   }
 
   /**
@@ -120,7 +130,7 @@ export class GoodrFunSDK {
           ),
           realTokenReserves: new BigNumber(event.realTokenReserves.toString()),
           realSolReserves: new BigNumber(event.realSolReserves.toString()),
-          baseCurrencyMint: event.baseCurrencyMint,
+          currency: event.currency as CurrencyType,
         },
         slot,
         signature,

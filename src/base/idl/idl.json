@@ -1482,10 +1482,8 @@
             "type": "pubkey"
           },
           {
-            "name": "base_currency_mint",
-            "type": {
-              "option": "pubkey"
-            }
+            "name": "currency",
+            "type": "string"
           }
         ]
       }
@@ -1650,10 +1648,8 @@
             "type": "u64"
           },
           {
-            "name": "base_currency_mint",
-            "type": {
-              "option": "pubkey"
-            }
+            "name": "currency",
+            "type": "string"
           }
         ]
       }
