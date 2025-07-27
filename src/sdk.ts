@@ -535,13 +535,15 @@ export class GoodrFunSDK {
         ? DEFAULT_SLIPPAGE_BASIS_POINTS
         : params.slippageBasisPoints;
 
-    // Fetch the bonding curve to get the actual token creator
-    const bondingCurveAccount = await this.program.getBondingCurveState({
+    // Fetch the bonding curve to get the actual token creator (SONIC tokens use V2)
+    const bondingCurveAccount = await this.program.getBondingCurveV2State({
       mint: params.mint,
     });
 
     if (!bondingCurveAccount) {
-      throw new Error(`Bonding curve not found for mint: ${params.mint.toString()}`);
+      throw new Error(
+        `Bonding curve V2 not found for mint: ${params.mint.toString()}`,
+      );
     }
 
     const { amountToken, maxCostSonic } =
@@ -619,13 +621,15 @@ export class GoodrFunSDK {
         ? DEFAULT_SLIPPAGE_BASIS_POINTS
         : params.slippageBasisPoints;
 
-    // Fetch the bonding curve to get the actual token creator
-    const bondingCurveAccount = await this.program.getBondingCurveState({
+    // Fetch the bonding curve to get the actual token creator (SONIC tokens use V2)
+    const bondingCurveAccount = await this.program.getBondingCurveV2State({
       mint: params.mint,
     });
 
     if (!bondingCurveAccount) {
-      throw new Error(`Bonding curve not found for mint: ${params.mint.toString()}`);
+      throw new Error(
+        `Bonding curve V2 not found for mint: ${params.mint.toString()}`,
+      );
     }
 
     const { amountToken, minSonicReceived } =
