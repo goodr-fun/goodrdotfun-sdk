@@ -535,6 +535,15 @@ export class GoodrFunSDK {
         ? DEFAULT_SLIPPAGE_BASIS_POINTS
         : params.slippageBasisPoints;
 
+    // Fetch the bonding curve to get the actual token creator
+    const bondingCurveAccount = await this.program.getBondingCurveState({
+      mint: params.mint,
+    });
+
+    if (!bondingCurveAccount) {
+      throw new Error(`Bonding curve not found for mint: ${params.mint.toString()}`);
+    }
+
     const { amountToken, maxCostSonic } =
       await this.program.calculateBuyTokenAmountWithSpl({
         mint: params.mint,
@@ -549,7 +558,7 @@ export class GoodrFunSDK {
       sonicMint: params.baseCurrencyMint,
       amount: amountToken,
       maxCostSonic: maxCostSonic,
-      creatorWallet: creator,
+      creatorWallet: bondingCurveAccount.creator, // Use the actual token creator
     });
 
     return buyTokenTx;
@@ -610,6 +619,15 @@ export class GoodrFunSDK {
         ? DEFAULT_SLIPPAGE_BASIS_POINTS
         : params.slippageBasisPoints;
 
+    // Fetch the bonding curve to get the actual token creator
+    const bondingCurveAccount = await this.program.getBondingCurveState({
+      mint: params.mint,
+    });
+
+    if (!bondingCurveAccount) {
+      throw new Error(`Bonding curve not found for mint: ${params.mint.toString()}`);
+    }
+
     const { amountToken, minSonicReceived } =
       await this.program.calculateSellTokenAmountWithSpl({
         mint: params.mint,
@@ -624,7 +642,7 @@ export class GoodrFunSDK {
       sonicMint: params.baseCurrencyMint,
       amount: amountToken,
       minSonicReceived: minSonicReceived,
-      creatorWallet: creator,
+      creatorWallet: bondingCurveAccount.creator, // Use the actual token creator
     });
 
     return sellTokenTx;
