@@ -160,22 +160,54 @@ export class GoodrFunProgramBase {
    * @returns The appropriate token program ID
    */
   async getTokenProgramForMint(mint: PublicKey): Promise<PublicKey> {
+    // SONIC tokens are always in TOKEN_2022_PROGRAM_ID
+    const SONIC_MAINNET_MINT = 'mrujEYaN1oyQXDHeYNxBYpxWKVkQ2XsGxfznpifu4aL';
+    const SONIC_TESTNET_MINT = 'Dp3dL14gJMQDCxE2XZKd4Jz42TShQLY7gGzU2YgmVY2J';
+
+    const mintString = mint.toString();
+
+    // Force TOKEN_2022_PROGRAM_ID for SONIC tokens
+    if (
+      mintString === SONIC_MAINNET_MINT ||
+      mintString === SONIC_TESTNET_MINT
+    ) {
+      console.log(
+        '🔧 SDK: Forcing TOKEN_2022_PROGRAM_ID for SONIC mint:',
+        mintString,
+      );
+      return TOKEN_2022_PROGRAM_ID;
+    }
+
     try {
       const mintInfo = await this.connection.getAccountInfo(mint);
       if (!mintInfo) {
-        throw new Error('Mint account not found');
+        console.log(
+          '⚠️ SDK: Mint account not found, defaulting to TOKEN_2022_PROGRAM_ID',
+        );
+        return TOKEN_2022_PROGRAM_ID;
       }
 
       if (mintInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
+        console.log(
+          '✅ SDK: Detected TOKEN_2022_PROGRAM_ID for mint:',
+          mintString,
+        );
         return TOKEN_2022_PROGRAM_ID;
       } else if (mintInfo.owner.equals(TOKEN_PROGRAM_ID)) {
+        console.log('✅ SDK: Detected TOKEN_PROGRAM_ID for mint:', mintString);
         return TOKEN_PROGRAM_ID;
       } else {
-        throw new Error('Invalid mint owner program');
+        console.log(
+          '❌ SDK: Invalid mint owner program, defaulting to TOKEN_2022_PROGRAM_ID',
+        );
+        return TOKEN_2022_PROGRAM_ID;
       }
     } catch (error) {
-      // Default to regular token program if can't determine
-      return TOKEN_PROGRAM_ID;
+      console.log(
+        '⚠️ SDK: Error detecting token program, defaulting to TOKEN_2022_PROGRAM_ID:',
+        error,
+      );
+      return TOKEN_2022_PROGRAM_ID;
     }
   }
 
