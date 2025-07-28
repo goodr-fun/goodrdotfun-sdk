@@ -27,6 +27,7 @@ import {
   getMemeDonationDestinationFromName,
   CurrencyType,
 } from './types';
+import * as anchor from '@coral-xyz/anchor';
 import { BN } from 'bn.js';
 import { DEFAULT_SLIPPAGE_BASIS_POINTS, TOKEN_DECIMALS } from './base/constant';
 import { sendTx } from './base/helpers/helper';
@@ -57,6 +58,39 @@ export class GoodrFunSDK {
    */
   get programId(): PublicKey {
     return this.program.program.programId;
+  }
+
+  /**
+   * Calculate buy token amount with slippage for SOL (public method for testing)
+   * @param params - Calculation parameters
+   * @returns Token amount and max cost
+   */
+  async calculateBuyTokenAmountWithSlippage(params: {
+    mint: PublicKey;
+    amountSol: anchor.BN;
+    slippage: number;
+  }): Promise<{
+    amountToken: anchor.BN;
+    maxCostSol: anchor.BN;
+  }> {
+    return this.program.calculateBuyTokenAmount(params);
+  }
+
+  /**
+   * Calculate buy token amount with slippage for SONIC (public method for testing)
+   * @param params - Calculation parameters
+   * @returns Token amount and max cost
+   */
+  async calculateBuyTokenAmountWithSplSlippage(params: {
+    mint: PublicKey;
+    sonicMint: PublicKey;
+    amountSonic: anchor.BN;
+    slippage: number;
+  }): Promise<{
+    amountToken: anchor.BN;
+    maxCostSonic: anchor.BN;
+  }> {
+    return this.program.calculateBuyTokenAmountWithSpl(params);
   }
 
   /**

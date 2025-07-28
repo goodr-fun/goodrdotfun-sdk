@@ -1,6 +1,6 @@
 {
   "name": "goodrdotfun-sdk",
-  "version": "0.1.33",
+  "version": "0.1.35",
   "description": "SDK for interacting with goodr.fun and Sonic on Solana",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,6 +14,7 @@
     "clean": "rimraf dist",
     "test": "jest",
     "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"examples/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"examples/**/*.ts\"",
     "prepare": "npm run build"
