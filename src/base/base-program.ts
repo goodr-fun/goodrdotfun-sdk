@@ -1049,10 +1049,10 @@ export class GoodrFunProgramBase {
   }
 
   /**
-   * Calculates the amount of tokens to buy from the bonding curve.
+   * Calculates the amount of tokens to buy with improved slippage protection.
    * @param mint - The mint to buy the tokens for.
    * @param amountSol - The amount of SOL to buy the tokens with.
-   * @param slippage - The slippage percentage.
+   * @param slippage - The slippage percentage (e.g., 5 = 5%, capped at 20% for safety).
    * @returns The amount of tokens to buy and the maximum cost in SOL.
    */
   async calculateBuyTokenAmount({
@@ -1067,6 +1067,12 @@ export class GoodrFunProgramBase {
     amountToken: anchor.BN;
     maxCostSol: anchor.BN;
   }> {
+    console.log('🔧 SDK: Fixed calculateBuyTokenAmount called', {
+      mint: mint.toString(),
+      amountSol: amountSol.toString(),
+      slippage,
+    });
+
     const bondingCurveState = await this.getBondingCurveState({ mint });
     if (bondingCurveState) {
       const virtualSolReserves = bondingCurveState?.virtualSolReserves;
@@ -1080,7 +1086,9 @@ export class GoodrFunProgramBase {
       }
       return {
         amountToken: deltaToken,
-        maxCostSol: amountSol.mul(new BN(slippage + 100)).div(new BN(100)),
+        maxCostSol: amountSol
+          .mul(new BN(100 + Math.min(slippage, 20)))
+          .div(new BN(100)),
       };
     } else {
       const globalState = await this.getGlobalState();
@@ -1095,7 +1103,9 @@ export class GoodrFunProgramBase {
       );
       return {
         amountToken: deltaToken,
-        maxCostSol: amountSol.mul(new BN(slippage + 100)).div(new BN(100)),
+        maxCostSol: amountSol
+          .mul(new BN(100 + Math.min(slippage, 20)))
+          .div(new BN(100)),
       };
     }
   }
@@ -1248,7 +1258,7 @@ export class GoodrFunProgramBase {
       return {
         amountToken: deltaToken,
         maxCostSonic: amountSonic
-          .mul(new anchor.BN(slippage + 100))
+          .mul(new anchor.BN(100 + Math.min(slippage, 20)))
           .div(new anchor.BN(100)),
       };
     } else {
@@ -1266,7 +1276,7 @@ export class GoodrFunProgramBase {
       return {
         amountToken: deltaToken,
         maxCostSonic: amountSonic
-          .mul(new anchor.BN(slippage + 100))
+          .mul(new anchor.BN(100 + Math.min(slippage, 20)))
           .div(new anchor.BN(100)),
       };
     }
@@ -1354,5 +1364,70 @@ export class GoodrFunProgramBase {
           .div(new anchor.BN(100)),
       };
     }
+  }
+
+  /**
+   * Helper method to calculate tokens for given SONIC amount
+   * @private
+   */
+  private calculateTokensForSonic(
+    bondingCurve: any,
+    sonicAmount: anchor.BN,
+  ): { tokens: anchor.BN; actualCost: anchor.BN } {
+    const virtualSonicReserves = bondingCurve.virtualBaseReserves;
+    const virtualTokenReserves = bondingCurve.virtualTokenReserves;
+    const constant = virtualSonicReserves.mul(virtualTokenReserves);
+
+    let deltaToken = virtualTokenReserves.sub(
+      constant.div(virtualSonicReserves.add(sonicAmount)),
+    );
+
+    // Cap at available tokens
+    if (deltaToken.gt(bondingCurve.realTokenReserves)) {
+      deltaToken = bondingCurve.realTokenReserves;
+    }
+
+    return {
+      tokens: deltaToken,
+      actualCost: sonicAmount,
+    };
+  }
+
+  /**
+   * Helper method to calculate SONIC needed for specific token amount
+   * @private
+   */
+  private calculateSonicForTokens(
+    bondingCurve: any,
+    tokenAmount: anchor.BN,
+  ): anchor.BN {
+    const virtualSonicReserves = bondingCurve.virtualBaseReserves;
+    const virtualTokenReserves = bondingCurve.virtualTokenReserves;
+    const constant = virtualSonicReserves.mul(virtualTokenReserves);
+
+    const newTokenReserves = virtualTokenReserves.sub(tokenAmount);
+    const newSonicReserves = constant.div(newTokenReserves);
+
+    return newSonicReserves.sub(virtualSonicReserves);
+  }
+
+  /**
+   * Helper method to calculate fees
+   * @private
+   */
+  private calculateFees(
+    baseAmount: anchor.BN,
+    operatingFeeBasisPoints: number,
+    creatorFeeBasisPoints: number,
+  ): { operatingFee: anchor.BN; creatorFee: anchor.BN } {
+    const operatingFee = baseAmount
+      .mul(new anchor.BN(operatingFeeBasisPoints))
+      .div(new anchor.BN(10000));
+
+    const creatorFee = baseAmount
+      .mul(new anchor.BN(creatorFeeBasisPoints))
+      .div(new anchor.BN(10000));
+
+    return { operatingFee, creatorFee };
   }
 }

@@ -4,6 +4,7 @@ import {
   PublicKey,
   Connection,
 } from '@solana/web3.js';
+import * as anchor from '@coral-xyz/anchor';
 import {
   ChainType,
   getMemeDonationDestinationFromName,
@@ -281,6 +282,163 @@ const main = async () => {
   } else {
     console.log('📈 Net result: Gain from trading');
   }
+
+  // Step 6: Slippage Protection Tests
+  console.log('\n=== SLIPPAGE PROTECTION TESTS ===');
+  await testSlippageProtection(sdk, mint.publicKey, wallet);
 };
+
+async function testSlippageProtection(
+  sdk: GoodrFunSDK,
+  mintAddress: PublicKey,
+  wallet: Keypair,
+) {
+  console.log('\n--- Testing SOL Slippage Calculations ---');
+
+  const testAmount = new BigNumber(0.01).multipliedBy(LAMPORTS_PER_SOL); // 0.01 SOL
+
+  // Test different slippage values
+  const slippageTests = [
+    { slippage: 100, description: '1%' },
+    { slippage: 500, description: '5%' },
+    { slippage: 1000, description: '10%' },
+    { slippage: 2000, description: '20%' },
+    { slippage: 5000, description: '50% (should be capped at 20%)' },
+    { slippage: 10000, description: '100% (should be capped at 20%)' },
+  ];
+
+  for (const test of slippageTests) {
+    console.log(`\n💡 Testing ${test.description} slippage:`);
+
+    try {
+      // Get current bonding curve state
+      const currentState = await sdk.getCurrentState(mintAddress);
+      console.log(
+        `📊 Current price: ${currentState.priceData.price.toFixed(12)} SOL per token`,
+      );
+
+      // Test the calculation method
+      const result = await sdk.calculateBuyTokenAmountWithSlippage({
+        mint: mintAddress,
+        amountSol: new anchor.BN(testAmount.toNumber()),
+        slippage: test.slippage / 100, // Convert basis points to percentage
+      });
+
+      const inputSol = testAmount.dividedBy(LAMPORTS_PER_SOL);
+      const maxCostSol = new BigNumber(result.maxCostSol.toString()).dividedBy(
+        LAMPORTS_PER_SOL,
+      );
+      const tokensExpected = new BigNumber(
+        result.amountToken.toString(),
+      ).dividedBy(10 ** TOKEN_DECIMALS);
+
+      const maxCostIncrease = maxCostSol.minus(inputSol);
+      const maxCostIncreasePercent = maxCostIncrease
+        .dividedBy(inputSol)
+        .multipliedBy(100);
+
+      console.log(`  💰 Input amount: ${inputSol.toFixed(6)} SOL`);
+      console.log(`  🎯 Max cost allowed: ${maxCostSol.toFixed(6)} SOL`);
+      console.log(
+        `  📈 Max cost increase: ${maxCostIncrease.toFixed(6)} SOL (${maxCostIncreasePercent.toFixed(2)}%)`,
+      );
+      console.log(`  🪙 Expected tokens: ${tokensExpected.toFixed(0)} tokens`);
+
+      // Verify the fix is working
+      if (test.slippage > 2000) {
+        // More than 20%
+        if (maxCostIncreasePercent.lte(20.1)) {
+          // Allow small rounding error
+          console.log(`  ✅ FIXED: Slippage correctly capped at ~20%`);
+        } else {
+          console.log(
+            `  ❌ BROKEN: Slippage not capped! Allowing ${maxCostIncreasePercent.toFixed(2)}% increase`,
+          );
+        }
+      } else {
+        const expectedIncrease = test.slippage / 100;
+        if (
+          Math.abs(maxCostIncreasePercent.toNumber() - expectedIncrease) < 0.1
+        ) {
+          console.log(
+            `  ✅ CORRECT: Slippage matches expected ${expectedIncrease}%`,
+          );
+        } else {
+          console.log(
+            `  ⚠️  UNEXPECTED: Expected ${expectedIncrease}% but got ${maxCostIncreasePercent.toFixed(2)}%`,
+          );
+        }
+      }
+    } catch (error) {
+      console.log(
+        `  ❌ ERROR: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  console.log('\n--- Testing Edge Cases ---');
+
+  // Test with very small amount
+  console.log('\n💡 Testing with very small amount (0.001 SOL):');
+  try {
+    const smallAmount = new BigNumber(0.001).multipliedBy(LAMPORTS_PER_SOL);
+    const result = await sdk.calculateBuyTokenAmountWithSlippage({
+      mint: mintAddress,
+      amountSol: new anchor.BN(smallAmount.toNumber()),
+      slippage: 10, // 10%
+    });
+
+    const inputSol = smallAmount.dividedBy(LAMPORTS_PER_SOL);
+    const maxCostSol = new BigNumber(result.maxCostSol.toString()).dividedBy(
+      LAMPORTS_PER_SOL,
+    );
+    console.log(
+      `  💰 Input: ${inputSol.toFixed(6)} SOL → Max cost: ${maxCostSol.toFixed(6)} SOL`,
+    );
+    console.log(`  ✅ Small amount calculation works`);
+  } catch (error) {
+    console.log(
+      `  ❌ Small amount test failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  // Test simulation vs actual transaction consistency
+  console.log('\n💡 Testing simulation vs actual transaction:');
+  try {
+    const simAmount = new BigNumber(0.005).multipliedBy(LAMPORTS_PER_SOL); // 0.005 SOL
+    const simResult = await sdk.calculateBuyTokenAmountWithSlippage({
+      mint: mintAddress,
+      amountSol: new anchor.BN(simAmount.toNumber()),
+      slippage: 5, // 5%
+    });
+
+    const expectedMaxCost = new BigNumber(
+      simResult.maxCostSol.toString(),
+    ).dividedBy(LAMPORTS_PER_SOL);
+    console.log(
+      `  📊 Simulation shows max cost: ${expectedMaxCost.toFixed(6)} SOL for 0.005 SOL input`,
+    );
+    console.log(
+      `  📝 Note: In the fixed version, this should be close to 0.005 SOL (not 5.25 SOL like before)`,
+    );
+
+    if (expectedMaxCost.lt(0.01)) {
+      // Should be less than 0.01 SOL
+      console.log(
+        `  ✅ FIXED: Max cost is reasonable (${expectedMaxCost.toFixed(6)} SOL)`,
+      );
+    } else {
+      console.log(
+        `  ❌ BROKEN: Max cost is too high (${expectedMaxCost.toFixed(6)} SOL)`,
+      );
+    }
+  } catch (error) {
+    console.log(
+      `  ❌ Simulation test failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  console.log('\n🏁 SOL slippage tests completed!');
+}
 
 main();
